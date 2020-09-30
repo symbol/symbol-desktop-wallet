@@ -19,6 +19,8 @@ import { TransactionView } from './TransactionView'
 import { AttachedMosaic } from '@/services/MosaicService'
 import i18n from '@/language'
 import { TransactionDetailItem } from '@/core/transactions/TransactionDetailItem'
+import { MosaicService } from '@/services/MosaicService'
+import { MosaicModel } from '@/core/database/entities/MosaicModel'
 
 export class ViewTransferTransaction extends TransactionView<TransferTransaction> {
   public get isIncoming() {
@@ -41,6 +43,24 @@ export class ViewTransferTransaction extends TransactionView<TransferTransaction
   }
 
   /**
+   * get available mosaics to check if any of them is expired
+   * @var {MosaicModel[]}
+   */
+  private get availableMosaics(): MosaicModel[] {
+    const currentHeight = this.$store.getters['network/currentHeight']
+    const networkConfiguration = this.$store.getters['network/networkConfiguration']
+    const balanceMosaics = this.$store.getters['mosaic/balanceMosaics']
+    return balanceMosaics.filter((entry) => {
+      const expiration = MosaicService.getExpiration(
+        entry,
+        currentHeight,
+        networkConfiguration.blockGenerationTargetTime,
+      )
+      return expiration !== 'expired'
+    })
+  }
+
+  /**
    * Displayed items
    */
   protected resolveDetailItems(): TransactionDetailItem[] {
@@ -57,11 +77,18 @@ export class ViewTransferTransaction extends TransactionView<TransferTransaction
     const mosaicItems = attachedMosaics.map((mosaic, index, self) => {
       const color = incoming ? 'green' : 'red'
       const mosaicLabel = i18n.t('mosaic')
-      return {
-        key: `${mosaicLabel} (${index + 1}/${self.length})`,
-        value: { ...mosaic, color },
-        isMosaic: true,
-      }
+      // check if mosaic not expired yet
+      return this.availableMosaics.some((entry) => entry.mosaicIdHex == mosaic.mosaicHex)
+        ? {
+            key: `${mosaicLabel} (${index + 1}/${self.length})`,
+            value: { ...mosaic, color },
+            isMosaic: true,
+          }
+        : {
+            key: `${mosaicLabel} (${index + 1}/${self.length}) ${i18n.t('mosaic_expired')}`,
+            value: { ...mosaic, color },
+            isMosaic: true,
+          }
     })
 
     return [

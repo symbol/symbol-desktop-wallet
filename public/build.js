@@ -1,129 +1,154 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path')
-const {app, BrowserWindow, shell, globalShortcut, Menu, ipcMain} = require('electron')
+const { app, BrowserWindow, shell, globalShortcut, Menu, ipcMain } = require('electron')
 const electron = require('electron')
 const name = electron.app.getName()
 
 // Set the path of the folder where the persisted data is stored
-electron.app.setPath ('userData', path.join(electron.app.getPath('home'), '.symbol-desktop-wallet'))
+electron.app.setPath('userData', path.join(electron.app.getPath('home'), '.symbol-desktop-wallet'))
 
-const iconUrlPath = process.platform === 'darwin' ? './dist/assets/logo.png' : '../dist/assets/logo.png'
-const loadUrlPath = process.platform === 'darwin' ? './dist/index.html' : '../dist/index.html'
+const iconUrlPath =
+  process.platform === 'darwin' ? './dist/assets/logo.png' : `file://${__dirname}/../dist/assets/logo.png`
+const loadUrlPath = process.platform === 'darwin' ? './dist/index.html' : `file://${__dirname}/../dist/index.html`
 
 let mainWindow = null
 
-const template = [{
-  label: 'Window',
-  role: 'window',
-  submenu: [{
-    label: 'Minimize',
-    accelerator: 'CmdOrCtrl+M',
-    role: 'minimize',
-  }, {
-    label: 'Close',
-    accelerator: 'CmdOrCtrl+W',
-    role: 'close',
-  }, {
-    label: 'Toggle Full Screen',
-    accelerator: (function() {
-      if (process.platform === 'darwin') {
-        return 'Ctrl+Command+F'
-      }
+const template = [
+  {
+    label: 'Window',
+    role: 'window',
+    submenu: [
+      {
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        role: 'minimize',
+      },
+      {
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        role: 'close',
+      },
+      {
+        label: 'Toggle Full Screen',
+        accelerator: (function () {
+          if (process.platform === 'darwin') {
+            return 'Ctrl+Command+F'
+          }
 
-      return 'F11'
-    })(),
-    click: function(item, focusedWindow) {
-      if (focusedWindow) {
-        focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
-      }
-    },
-  }, {
-    label: 'Toggle Developer Tools',
-    accelerator: (function() {
-      if (process.platform === 'darwin') {
-        return 'Alt+Command+I'
-      }
+          return 'F11'
+        })(),
+        click: function (item, focusedWindow) {
+          if (focusedWindow) {
+            focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
+          }
+        },
+      },
+      {
+        label: 'Toggle Developer Tools',
+        accelerator: (function () {
+          if (process.platform === 'darwin') {
+            return 'Alt+Command+I'
+          }
 
-      return 'Ctrl+Shift+I'
-    })(),
-    click: function(item, focusedWindow) {
-      if (focusedWindow) {
-        focusedWindow.toggleDevTools()
-      }
-    },
-  }],
-}, {
-  label: 'Edit',
-  role: 'edit',
-  submenu: [{
-    label: 'Cut',
-    accelerator: 'CmdOrCtrl+X',
-    role: 'cut',
+          return 'Ctrl+Shift+I'
+        })(),
+        click: function (item, focusedWindow) {
+          if (focusedWindow) {
+            focusedWindow.toggleDevTools()
+          }
+        },
+      },
+    ],
   },
   {
-    label: 'Copy',
-    accelerator: 'CmdOrCtrl+C',
-    role: 'copy',
+    label: 'Edit',
+    role: 'edit',
+    submenu: [
+      {
+        label: 'Cut',
+        accelerator: 'CmdOrCtrl+X',
+        role: 'cut',
+      },
+      {
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        role: 'copy',
+      },
+      {
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        role: 'paste',
+      },
+      {
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        role: 'selectAll',
+      },
+    ],
   },
   {
-    label: 'Paste',
-    accelerator: 'CmdOrCtrl+V',
-    role: 'paste',
+    label: 'Help',
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: function () {
+          electron.shell.openExternal('https://github.com/nemfoundation/symbol-desktop-wallet')
+        },
+      },
+      {
+        label: 'About NEM',
+        click: function () {
+          electron.shell.openExternal('https://nem.io/')
+        },
+      },
+    ],
   },
-  {
-    label: 'Select All',
-    accelerator: 'CmdOrCtrl+A',
-    role: 'selectAll',
-  }]
-}, {
-  label: 'Help',
-  role: 'help',
-  submenu: [{
-    label: 'Learn More',
-    click: function() {
-      electron.shell.openExternal('https://github.com/nemfoundation/symbol-desktop-wallet')
-    },
-  }, {
-    label: 'About NEM',
-    click: function() {
-      electron.shell.openExternal('https://nem.io/')
-    },
-  }],
-}]
+]
 if (process.platform === 'darwin') {
   template.unshift({
     label: name,
-    submenu: [{
-      label: `About ${name}`,
-      role: 'about',
-    }, {
-      type: 'separator',
-    }, {
-      label: 'Services',
-      role: 'services',
-      submenu: [],
-    }, {
-      type: 'separator',
-    }, {
-      label: `Hide ${name}`,
-      accelerator: 'Command+H',
-      role: 'hide',
-    }, {
-      label: 'Hide others',
-      accelerator: 'Command+Alt+H',
-      role: 'hideothers',
-    }, {
-      label: 'Show',
-      role: 'unhide',
-    }, {
-      type: 'separator',
-    }, {
-      label: 'Quit',
-      accelerator: 'Command+Q',
-      click: function() {
-        app.quit()
+    submenu: [
+      {
+        label: `About ${name}`,
+        role: 'about',
       },
-    }],
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Services',
+        role: 'services',
+        submenu: [],
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: `Hide ${name}`,
+        accelerator: 'Command+H',
+        role: 'hide',
+      },
+      {
+        label: 'Hide others',
+        accelerator: 'Command+Alt+H',
+        role: 'hideothers',
+      },
+      {
+        label: 'Show',
+        role: 'unhide',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Quit',
+        accelerator: 'Command+Q',
+        click: function () {
+          app.quit()
+        },
+      },
+    ],
   })
   if (process.mas) app.setName('·')
   ipcMain.on('app', (event, arg) => {
@@ -159,7 +184,9 @@ if (process.platform !== 'darwin') {
       }
     })
 
-    app.on('ready', () => {/** This function body is needed */})
+    app.on('ready', () => {
+      /** This function body is needed */
+    })
   }
 
   ipcMain.on('app', (event, arg) => {
@@ -182,7 +209,6 @@ if (process.platform !== 'darwin') {
   })
 }
 
-
 function initialize() {
   function createMac() {
     const size = require('electron').screen.getPrimaryDisplay().workAreaSize
@@ -197,7 +223,7 @@ function initialize() {
         resizable: true,
       })
     } else {
-      height = parseInt(1080 * size.width / 1920 + 30)
+      height = parseInt((1080 * size.width) / 1920 + 30)
       mainWindow = new BrowserWindow({
         width: width - 100,
         height: height - 50,
@@ -206,7 +232,7 @@ function initialize() {
       })
     }
     mainWindow.loadFile(loadUrlPath)
-    mainWindow.on('closed', function() {
+    mainWindow.on('closed', function () {
       mainWindow = null
     })
     const menu = Menu.buildFromTemplate(template)
@@ -214,7 +240,6 @@ function initialize() {
   }
 
   function createWindow() {
-
     const size = electron.screen.getPrimaryDisplay().workAreaSize
 
     const originWidth = size.width
@@ -238,10 +263,10 @@ function initialize() {
       },
       resizable: true,
     }
-    windowOptions.icon = path.join(__dirname, iconUrlPath)
+    windowOptions.icon = iconUrlPath
     mainWindow = new BrowserWindow(windowOptions)
     mainWindow.setMenu(null)
-    mainWindow.loadURL(path.join(__dirname, loadUrlPath))
+    mainWindow.loadURL(loadUrlPath)
 
     mainWindow.once('ready-to-show', () => {
       mainWindow.show()
@@ -258,13 +283,13 @@ function initialize() {
     app.on('ready', createMac)
   } else {
     app.on('ready', createWindow)
-    app.on('ready', function() {
-      globalShortcut.register('CommandOrControl+R', function() {
+    app.on('ready', function () {
+      globalShortcut.register('CommandOrControl+R', function () {
         // do nothing to forbidden default refresh
       })
     })
   }
-  app.on('window-all-closed', function() {
+  app.on('window-all-closed', function () {
     app.quit()
   })
   app.on('web-contents-created', (e, webContents) => {

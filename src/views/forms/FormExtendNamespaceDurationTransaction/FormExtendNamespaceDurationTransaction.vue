@@ -57,6 +57,7 @@
             </ValidationProvider>
           </template>
         </FormRow>
+        <RentalFee :rental-type="'root-namespace'" :duration="formItems.duration"></RentalFee>
 
         <MaxFeeAndSubmit v-model="formItems.maxFee" @button-clicked="handleSubmit(onSubmit)" />
       </form>

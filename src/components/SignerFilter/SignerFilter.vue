@@ -13,9 +13,6 @@
 </template>
 <script lang="ts">
 // @ts-ignore
-import { TransactionAddressFilterTs } from './TransactionAddressFilterTs'
-export default class TransactionAddressFilter extends TransactionAddressFilterTs {}
+import { SignerFilterTs } from './SignerFilterTs'
+export default class SignerFilter extends SignerFilterTs {}
 </script>
-<style lang="less" scoped>
-@import './TransactionAddressFilter.less';
-</style>

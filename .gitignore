@@ -19,3 +19,5 @@ __tests__/**/*.map
 __tests__/**/*.js
 __mocks__/**/*.map
 __mocks__/**/*.js
+/.templates
+template.config.js

@@ -1,3 +1,5 @@
+@import '../../../../views/resources/css/variables.less';
+
 .transfer-container {
   width: 100%;
   height: 100%;
@@ -10,8 +12,28 @@
     height: 100%;
     width: 100%;
     background-color: white;
-    position: relative;
     padding-left: 0.5rem;
     padding-top: 0.5rem;
+
+    /deep/.form-wrapper {
+      position: unset;
+    }
+
+    /deep/.transfer-actions {
+      position: absolute;
+      top: 0.3rem;
+      right: 0.3rem;
+
+      a {
+        color: @purpleDark;
+        i {
+          margin-right: 0.03rem;
+        }
+      }
+    }
+
+    /deep/.transaction-uri-display-row {
+      margin-top: 0.5rem;
+    }
   }
 }

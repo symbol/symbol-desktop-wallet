@@ -2,6 +2,8 @@
   <FormWrapper>
     <ValidationObserver ref="observer" v-slot="{ handleSubmit }" slim>
       <form onsubmit="event.preventDefault()" class="form-container">
+        <SignerSelector v-model="formItems.signerAddress" :signers="signers" @input="onChangeSigner" />
+
         <!-- UNLINK alias action -->
         <FormRow v-if="aliasAction === AliasAction.Unlink">
           <template v-slot:inputs>

@@ -9,10 +9,10 @@
               <div class="inputs-container">
                 <div class="select-container">
                   <Select v-model="formItems.type" class="select-size select-style">
-                    <Option value="child_account">
+                    <Option v-show="!isPrivateKeyProfile" value="child_account">
                       {{ $t('option_child_account') }}
                     </Option>
-                    <Option value="privatekey_account">
+                    <Option v-show="!isPrivateKeyProfile" value="privatekey_account">
                       {{ $t('option_privatekey_account') }}
                     </Option>
                   </Select>

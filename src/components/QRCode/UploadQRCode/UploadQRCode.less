@@ -1,0 +1,66 @@
+/*
+ * Copyright 2020 NEM Foundation (https://nem.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
+ *
+ */
+@import '../../../views/resources/css/variables.less';
+
+.upload-qrcode-container {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  i {
+    color: @grayLight;
+    font-size: 1rem;
+  }
+
+  /deep/.ivu-upload .ivu-upload-drag {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 3rem;
+  }
+
+  /deep/.ivu-upload-drag:hover {
+    border: 0.01rem dashed @purpleLight;
+  }
+
+  .upload-qrcode-preview {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    width: 3rem;
+    margin-bottom: 0.1rem;
+    color: @purple;
+    img {
+      width: 2rem;
+    }
+  }
+
+  .upload-qrcode-right-pane {
+    .upload-qrcode-explanation {
+      font-size: 0.2rem;
+      margin-top: 0.2rem;
+    }
+    .upload-qrcode-valid-qrcodes {
+      font-size: 0.17rem;
+      margin-top: 0.2rem;
+      ul {
+        list-style: circle inside none;
+        li.selected {
+          color: @purpleLight;
+        }
+      }
+    }
+  }
+}

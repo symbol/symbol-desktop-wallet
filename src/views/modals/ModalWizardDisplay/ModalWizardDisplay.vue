@@ -1,5 +1,5 @@
 <template>
-  <Steps :current="currentItemIndex" size="small">
+  <Steps :current="currentItemIndex" :size="size">
     <Step
       v-for="(item, index) in items"
       :key="index"
@@ -22,6 +22,7 @@ export default class ModalWizardDisplay extends Vue {
   @Prop({ default: () => [] }) items: string[]
   @Prop({ default: () => [] }) icons: string[]
   @Prop({ default: 0 }) currentItemIndex: number
+  @Prop({ default: 'small' }) size: string
 
   protected showWizard(): void {
     this.isDisplayed = true

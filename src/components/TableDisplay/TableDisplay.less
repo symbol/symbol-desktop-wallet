@@ -118,6 +118,8 @@
         color: @grayDark;
       }
       .user-operation {
+        display: flex;
+        justify-content: flex-end;
         position: absolute;
         right: 0.5rem;
         bottom: 0.2rem;
@@ -127,6 +129,53 @@
           font-weight: 600;
           &:hover {
             cursor: pointer;
+          }
+        }
+        .table-filter-item-container {
+          margin: 0.07rem 0.2rem 0 0;
+        }
+        /deep/.ivu-select {
+          .ivu-select-selection {
+            font-size: @normalFont;
+
+            &:hover {
+              color: @white;
+              background-color: @purpleDark;
+
+              .ivu-icon-ios-arrow-down::before {
+                color: @white !important;
+              }
+              .ivu-select-prefix {
+                color: @white;
+              }
+            }
+
+            .ivu-select-prefix {
+              color: @purpleDark;
+            }
+          }
+
+          .ivu-select-visible {
+            .ivu-select-selection {
+              color: @white !important;
+              background-color: @purpleDark;
+              border: 0.01rem solid @purpleDark;
+            }
+
+            .ivu-icon-ios-arrow-down::before {
+              color: @white !important;
+            }
+
+            .ivu-select-prefix {
+              color: @white;
+            }
+          }
+          .ivu-select-group-title {
+            font-size: @smallerFont !important;
+          }
+
+          .ivu-select-item {
+            font-size: @smallFont !important;
           }
         }
       }

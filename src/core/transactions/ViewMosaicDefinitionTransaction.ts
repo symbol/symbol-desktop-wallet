@@ -31,7 +31,6 @@ export class ViewMosaicDefinitionTransaction extends TransactionView<MosaicDefin
     const duration = this.transaction.duration.toString()
     const networkConfiguration: NetworkConfigurationModel = this.$store.getters['network/networkConfiguration']
     const blockGenerationTargetTime = networkConfiguration.blockGenerationTargetTime
-
     return [
       { key: 'mosaic_id', value: mosaicId.toHex() },
       {
@@ -56,6 +55,14 @@ export class ViewMosaicDefinitionTransaction extends TransactionView<MosaicDefin
       {
         key: 'table_header_restrictable',
         value: mosaicFlags.restrictable,
+      },
+      {
+        key: 'estimated_rental_fee',
+        value: {
+          amount: this.$store.getters['network/rentalFeeEstimation'].effectiveMosaicRentalFee.compact(),
+          color: 'red',
+        },
+        isMosaic: true,
       },
     ]
   }

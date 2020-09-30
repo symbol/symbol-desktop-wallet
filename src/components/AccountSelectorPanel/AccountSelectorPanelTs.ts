@@ -54,6 +54,7 @@ import { MosaicModel } from '@/core/database/entities/MosaicModel'
       mosaics: 'mosaic/mosaics',
       networkMosaic: 'mosaic/networkMosaic',
       networkCurrency: 'mosaic/networkCurrency',
+      isPrivateKeyProfile: 'profile/isPrivateKeyProfile',
     }),
   },
 })
@@ -124,6 +125,8 @@ export class AccountSelectorPanelTs extends Vue {
    * @var {ValidationRuleset}
    */
   public validationRules = ValidationRuleset
+
+  public isPrivateKeyProfile: boolean
 
   /**
    * Hook called when the component is created

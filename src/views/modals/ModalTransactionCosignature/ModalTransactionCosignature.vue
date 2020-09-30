@@ -34,7 +34,15 @@
         <div v-if="!needsCosignature">
           <div class="explain">
             <span class="subtitle">{{ $t('transaction_needs_cosignature') }}</span>
-            <p>{{ $t('transaction_needs_cosignature_explain_signed') }}</p>
+            <div class="explain-qr">
+              <p>{{ $t('transaction_needs_cosignature_explain_signed') }}</p>
+              <QRCodeDisplay
+                :qr-code="cosignatureQrCode"
+                show-download="true"
+                :download-name="'cosginatureqr_' + transaction.signer.address.plain()"
+                header="Cosignature QR Code"
+              />
+            </div>
           </div>
         </div>
         <div v-else>
@@ -45,6 +53,11 @@
 
           <HardwareConfirmationButton v-if="isUsingHardwareWallet" @success="onSigner" @error="onError" />
           <FormProfileUnlock v-else @success="onAccountUnlocked" @error="onError" />
+        </div>
+      </div>
+      <div v-else-if="expired">
+        <div class="explain">
+          <span class="subtitle">{{ $t('transaction_expired') }}</span>
         </div>
       </div>
       <div v-else>
@@ -61,32 +74,5 @@ import { ModalTransactionCosignatureTs } from './ModalTransactionCosignatureTs'
 export default class ModalTransactionCosignature extends ModalTransactionCosignatureTs {}
 </script>
 <style lang="less" scoped>
-@import '../../resources/css/variables.less';
-
-/deep/.modal-transaction-cosignature {
-  .explain {
-    padding: 0.2rem;
-    padding-left: 0.4rem;
-    font-size: @normalFont;
-
-    .subtitle {
-      color: @primary;
-      font-weight: @boldest;
-    }
-
-    p {
-      padding-top: 0.05rem;
-      text-align: justify;
-    }
-  }
-}
-
-.float-right {
-  float: right;
-}
-
-.clear-staged-transactions {
-  font-size: @smallFont;
-  cursor: pointer;
-}
+@import './ModalTransactionCosignature.less';
 </style>

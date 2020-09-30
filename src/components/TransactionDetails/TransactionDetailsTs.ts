@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { AggregateTransaction, Transaction } from 'symbol-sdk'
-
-// internal dependencies
-import { Formatters } from '@/core/utils/Formatters'
 
 // child components
 // @ts-ignore
@@ -38,32 +35,36 @@ export class TransactionDetailsTs extends Vue {
    */
   @Prop({ default: null }) transaction: Transaction
 
-  protected views: TransactionView<Transaction>[] = []
-
   /**
-   * Formatters
-   * @var {Formatters}
+   * Set if the transaction type is aggregate
+   * @var {AggregateTransaction}
    */
-  public formatters = Formatters
+  aggregateTransaction: AggregateTransaction = null
 
-  public async mounted() {
-    if (this.transaction instanceof AggregateTransaction && this.transaction.transactionInfo) {
-      //XXX should query transaction details
-      try {
-        const transaction: AggregateTransaction = (await this.$store.dispatch('transaction/LOAD_TRANSACTION_DETAILS', {
-          group: 'confirmed',
-          transactionHash: this.transaction.transactionInfo.hash,
-        })) as AggregateTransaction
+  public get views(): TransactionView<Transaction>[] {
+    if (!this.transaction) return []
 
-        this.views = [this.getView(transaction), ...transaction.innerTransactions.map((tx) => this.getView(tx))]
-        return
-      } catch (e) {
-        // fallback
-        this.views = [this.getView(this.transaction)]
+    if (this.aggregateTransaction) {
+      return [
+        this.getView(this.aggregateTransaction),
+        ...this.aggregateTransaction.innerTransactions.map((tx) => this.getView(tx)),
+      ]
+    }
+    return [this.getView(this.transaction)]
+  }
+
+  @Watch('transaction', { immediate: true })
+  public async refreshAggregateTransaction() {
+    if (this.transaction instanceof AggregateTransaction) {
+      if ((this.transaction as AggregateTransaction).innerTransactions?.length > 0) {
+        this.aggregateTransaction = this.transaction as AggregateTransaction
+      } else if (!!this.transaction.transactionInfo) {
+        this.aggregateTransaction = await this.$store.dispatch('transaction/LOAD_TRANSACTION_DETAILS', {
+          group: TransactionView.getTransactionStatus(this.transaction),
+          transactionHash: this.transaction.transactionInfo?.hash,
+        })
       }
     }
-
-    this.views = [this.getView(this.transaction)]
   }
 
   private getView(transaction: Transaction): TransactionView<Transaction> {

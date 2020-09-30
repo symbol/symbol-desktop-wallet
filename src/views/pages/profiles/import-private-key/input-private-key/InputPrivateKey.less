@@ -1,0 +1,65 @@
+@import '../../../../../views/resources/css/variables.less';
+
+.input-private-key-container {
+  display: grid;
+  grid-template-columns: 60% 30%;
+  margin-top: 0.18rem;
+}
+
+.input-private-key-form {
+  padding: 0.4rem 0.3rem;
+  border: 0.01rem solid @containerBorderColor;
+  border-radius: 0.05rem;
+
+  .row {
+    margin-bottom: 0.15rem;
+  }
+  .title {
+    color: @purpleDark;
+    font-size: @normalFont;
+  }
+  .related-info {
+    color: @textColor;
+    font-size: @smallerFont;
+    .row {
+      display: grid;
+      grid-template-columns: 2rem auto;
+      grid-column-gap: 0.1rem;
+    }
+    .related-info-label {
+      text-align: left;
+    }
+    .related-info-value {
+      text-align: left;
+    }
+  }
+}
+
+.buttons-container {
+  margin-top: 0.6rem;
+}
+
+.right-container {
+  padding-left: 0.8rem;
+  .title {
+    color: @purpleDark;
+    margin-bottom: 0.15rem;
+  }
+  .content {
+    p {
+      line-height: 1.5;
+      font-weight: 400;
+      padding-bottom: 0.15rem;
+      font-size: 0.2rem;
+      color: @grayDark;
+    }
+  }
+}
+
+.form-row {
+  width: 100%;
+
+  /deep/.form-row-inner-container-value-only {
+    grid-template-columns: 100%;
+  }
+}

@@ -197,7 +197,7 @@ export default class LoginPageTs extends Vue {
       }
 
       // if profile setup was not finalized, redirect
-      if (!profile.seed) {
+      if (!profile.seed && profile.accounts.length == 0) {
         this.$store.dispatch('profile/SET_CURRENT_PROFILE', profile)
         this.$store.dispatch('temporary/SET_PASSWORD', this.formItems.password)
         this.$store.dispatch(

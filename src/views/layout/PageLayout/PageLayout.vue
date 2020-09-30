@@ -22,11 +22,11 @@
         <WindowControls />
 
         <div class="app_controller clear">
+          <ImportQRButton v-if="!!currentAccount" valid-qr-types="[1, 3, 4]" />
           <div class="debug-console-trigger" @click="hasDebugConsoleModal = true">
             <Icon :type="'ios-code-working'" size="20" class="debug-console-trigger-icon" />
             <span>&nbsp;{{ $t('top_window_console') }}</span>
           </div>
-
           <PeerSelector />
           <LanguageSelector />
           <Settings />

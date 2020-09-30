@@ -3,7 +3,7 @@
     <div class="transaction-details-header-container">
       <TransactionDetailsHeader :view="views[0]" />
     </div>
-    <div class="transaction-details-detail-section-title-container">
+    <div v-if="views.length > 1" class="transaction-details-detail-section-title-container">
       <span class="transaction-details-detail-section-title">
         {{ $t('transaction_details') }}
       </span>

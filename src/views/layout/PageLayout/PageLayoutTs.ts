@@ -40,6 +40,9 @@ import ModalDebugConsole from '@/views/modals/ModalDebugConsole/ModalDebugConsol
 import Settings from '@/components/Settings/Settings.vue'
 import { URLInfo } from '@/core/utils/URLInfo'
 
+//@ts-ignore
+import ImportQRButton from '@/components/QRCode/ImportQRButton/ImportQRButton.vue'
+import { AccountModel } from '@/core/database/entities/AccountModel'
 @Component({
   components: {
     AppLogo,
@@ -51,6 +54,7 @@ import { URLInfo } from '@/core/utils/URLInfo'
     AccountSelectorField,
     ModalDebugConsole,
     Settings,
+    ImportQRButton,
   },
   computed: {
     ...mapGetters({
@@ -60,6 +64,7 @@ import { URLInfo } from '@/core/utils/URLInfo'
       generationHash: 'network/generationHash',
       currentProfile: 'profile/currentProfile',
       isCosignatoryMode: 'account/isCosignatoryMode',
+      currentAccount: 'account/currentAccount',
     }),
   },
 })
@@ -111,6 +116,13 @@ export class PageLayoutTs extends Vue {
    * @var {boolean}
    */
   public isDisplayingDebugConsole: boolean = false
+
+  /**
+   * Currently active account
+   * @see {Store.Account}
+   * @var {AccountModel}
+   */
+  public currentAccount: AccountModel
 
   /// region computed properties getter/setter
   /**

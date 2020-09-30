@@ -21,8 +21,8 @@
 
   .create-mnemonic-col {
     display: grid;
-    grid-template-columns: 9.5rem 4.66rem;
-    column-gap: 0.8rem;
+    grid-template-columns: 9.5rem 5.16rem;
+    column-gap: 0.3rem;
 
     .create-mnemonic-left {
       width: 100%;
@@ -48,6 +48,32 @@
 
     .create-mnemonic-right {
       width: 100%;
+
+      /deep/.ivu-alert {
+        .ivu-alert-message {
+          font-size: 0.22rem;
+        }
+
+        .ivu-alert-icon {
+          font-size: 0.4rem;
+          top: 0.25rem;
+          left: 0.05rem;
+        }
+
+        &.ivu-alert-warning {
+          background-color: transparent;
+          border: 1px solid rgba(51, 51, 51, 0.2);
+        }
+
+        &.ivu-alert-success {
+          background-color: transparent;
+          border: 1px solid rgba(51, 51, 51, 0.2);
+        }
+
+        &.ivu-alert-with-desc.ivu-alert-with-icon {
+          padding: 0.16rem 0.16rem 0.16rem 0.49rem;
+        }
+      }
     }
   }
 
@@ -64,13 +90,19 @@
     position: relative;
     .copy-button {
       position: absolute;
-      bottom: 0.1rem;
-      right: 0.1rem;
+      bottom: 0.17rem;
+      right: 2.3rem;
     }
+  }
+
+  .mnemonic-container > div:first-child {
+    display: flex;
+    flex-direction: row;
   }
 
   .mnemonic-list {
     padding: 10px;
+    border-right: 1px solid #eae6e6;
 
     span {
       display: inline-block;
@@ -80,6 +112,35 @@
       margin: 5px;
       font-size: @smallFont;
       color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  .mnemonic-qrcode {
+    padding: 0.05rem 0.1rem;
+    text-align: center;
+
+    img {
+      width: 2rem;
+    }
+  }
+
+  .mnemonic-backup-options-desc {
+    display: grid;
+    grid-template-columns: 2.8rem 1.5rem;
+    column-gap: 0.1rem;
+
+    .ivu-icon {
+      font-size: 0.48rem;
+      color: @grayDark;
+    }
+
+    span {
+      margin: 0.1rem 0.05rem 0 0;
+      flex-direction: column;
+
+      p {
+        text-align: left;
+      }
     }
   }
 }

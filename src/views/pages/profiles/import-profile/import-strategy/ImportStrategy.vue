@@ -25,7 +25,14 @@
           </p>
         </div>
       </div>
-      <div class="bottom-text">{{ $t('more_access_tool_is_working') }}...</div>
+      <div class="bottom-text">
+        <div class="link bottom-link" @click="$router.push({ name: 'profiles.importPrivateKey.fillInfo' })">
+          <i18n path="import_private_key">
+            <template v-slot:private_key> </template>
+          </i18n>
+        </div>
+        <div>{{ $t('more_access_tool_is_working') }}...</div>
+      </div>
     </div>
   </div>
 </template>

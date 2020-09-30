@@ -10,6 +10,12 @@
         />
       </div>
       <div class="transaction-list-pagination-container">
+        <button
+          class="centered-button button-style validation-button left download-transaction"
+          @click="downloadTransaction"
+        >
+          {{ $t('button_download_qr') }}
+        </button>
         <Page :total="totalCountItems" class="page_content" @on-change="onPageChange" />
       </div>
     </div>
@@ -24,8 +30,13 @@
     <ModalTransactionCosignature
       v-if="hasCosignatureModal"
       :visible="hasCosignatureModal"
-      :transaction="activePartialTransaction"
+      :transaction-hash="aggregateTransactionHash"
       @close="onCloseCosignatureModal"
+    />
+    <ModalTransactionExport
+      v-if="hasTransactionExportModal"
+      :visible="hasTransactionExportModal"
+      @close="hasTransactionExportModal = false"
     />
   </div>
 </template>

@@ -44,6 +44,8 @@ import DurationInput from '@/components/DurationInput/DurationInput.vue'
 import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue'
 // @ts-ignore
 import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue'
+//@ts-ignore
+import RentalFee from '@/components/RentalFees/RentalFee.vue'
 // configuration
 import { NamespaceModel } from '@/core/database/entities/NamespaceModel'
 import { NamespaceService } from '@/services/NamespaceService'
@@ -61,6 +63,7 @@ import { FilterHelpers } from '@/core/utils/FilterHelpers'
     DurationInput,
     ModalTransactionConfirmation,
     MaxFeeAndSubmit,
+    RentalFee,
   },
   computed: {
     ...mapGetters({
@@ -86,7 +89,6 @@ export class FormNamespaceRegistrationTransactionTs extends FormTransactionBase 
    * @var {NamespaceRegistrationType}
    */
   public typeRootNamespace = NamespaceRegistrationType.RootNamespace
-
   /**
    * Sub namespace type exposed to view
    * @var {NamespaceRegistrationType}
@@ -120,7 +122,6 @@ export class FormNamespaceRegistrationTransactionTs extends FormTransactionBase 
     const maxNamespaceDepth = this.networkConfiguration.maxNamespaceDepth
     return this.ownedNamespaces.filter(({ depth }) => depth < maxNamespaceDepth)
   }
-
   /**
    * Reset the form with properties
    * @return {void}
@@ -134,7 +135,6 @@ export class FormNamespaceRegistrationTransactionTs extends FormTransactionBase 
     this.formItems.newNamespaceName = this.namespaceId ? this.namespaceId.fullName : ''
     this.formItems.parentNamespaceName = this.parentNamespaceId ? this.parentNamespaceId.fullName : ''
     this.formItems.duration = this.duration || 172800
-
     // - maxFee must be absolute
     this.formItems.maxFee = this.defaultFee
   }

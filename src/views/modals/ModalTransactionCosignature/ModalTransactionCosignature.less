@@ -1,0 +1,41 @@
+@import '../../resources/css/variables.less';
+
+/deep/.modal-transaction-cosignature {
+  .explain {
+    padding: 0.2rem;
+    padding-left: 0.4rem;
+    font-size: @normalFont;
+
+    .subtitle {
+      color: @primary;
+      font-weight: @boldest;
+    }
+
+    p {
+      padding-top: 0.2rem;
+      text-align: justify;
+    }
+  }
+
+  .explain-qr {
+    display: grid;
+    grid-template-columns: 65% 35%;
+
+    div.qrcode-display {
+      margin: auto;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+  }
+}
+
+.float-right {
+  float: right;
+}
+
+.clear-staged-transactions {
+  font-size: @smallFont;
+  cursor: pointer;
+}

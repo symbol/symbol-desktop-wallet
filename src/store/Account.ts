@@ -310,6 +310,8 @@ export default {
 
       // remote calls:
 
+      if (!currentAccountAddress) return
+
       const getMultisigAccountGraphInfoPromise = repositoryFactory
         .createMultisigRepository()
         .getMultisigAccountGraphInfo(currentAccountAddress)

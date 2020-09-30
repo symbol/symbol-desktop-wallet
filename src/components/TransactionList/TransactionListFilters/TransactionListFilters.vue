@@ -4,7 +4,7 @@
       <TransactionStatusFilter @status-change="onStatusSelectorChange" />
     </div>
     <div v-if="signers.length > 1" class="transaction-list-filter-container">
-      <TransactionAddressFilter :signers="signers" @signer-change="onSignerSelectorChange" />
+      <SignerFilter :signers="signers" @signer-change="onSignerSelectorChange" />
     </div>
     <div class="button-refresh-container">
       <ButtonRefresh @click="refresh" />

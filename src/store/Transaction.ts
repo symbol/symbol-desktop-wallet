@@ -25,6 +25,7 @@ import {
   AggregateTransactionCosignature,
   TransactionGroup,
   Page,
+  TransactionStatus,
 } from 'symbol-sdk'
 import { combineLatest, Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -211,7 +212,7 @@ export default {
     },
 
     LOAD_TRANSACTION_DETAILS(
-      { commit, rootGetters },
+      { rootGetters },
       { group, transactionHash }: { group: TransactionGroupState; transactionHash: string },
     ): Promise<Transaction | AggregateTransaction> {
       if (!group) {
@@ -233,6 +234,22 @@ export default {
 
       // fetch transaction details
       return transactionRepository.getTransaction(transactionHash, sdkGroup).toPromise()
+    },
+
+    FETCH_TRANSACTION_STATUS(
+      { rootGetters },
+      { transactionHash }: { transactionHash: string },
+    ): Promise<Transaction | TransactionStatus> {
+      if (!transactionHash) {
+        throw Error("Missing mandatory field 'transactionHash' for action transaction/FETCH_TRANSACTION_STATUS.")
+      }
+
+      // prepare
+      const repositoryFactory: RepositoryFactory = rootGetters['network/repositoryFactory']
+      const transactionStatusRepository = repositoryFactory.createTransactionStatusRepository()
+
+      // fetch transaction status
+      return transactionStatusRepository.getTransactionStatus(transactionHash).toPromise()
     },
 
     SIGNER_CHANGED({ dispatch }) {

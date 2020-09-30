@@ -13,8 +13,15 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Account, AggregateTransaction, AggregateTransactionCosignature, CosignatureTransaction } from 'symbol-sdk'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import {
+  Account,
+  AggregateTransaction,
+  AggregateTransactionCosignature,
+  CosignatureTransaction,
+  NetworkType,
+  TransactionStatus,
+} from 'symbol-sdk'
 import { mapGetters } from 'vuex'
 
 import { AccountModel, AccountType } from '@/core/database/entities/AccountModel'
@@ -30,16 +37,22 @@ import TransactionDetails from '@/components/TransactionDetails/TransactionDetai
 import FormProfileUnlock from '@/views/forms/FormProfileUnlock/FormProfileUnlock.vue'
 // @ts-ignore
 import HardwareConfirmationButton from '@/components/HardwareConfirmationButton/HardwareConfirmationButton.vue'
+import { CosignatureQR } from 'symbol-qr-library'
+// @ts-ignore
+import QRCodeDisplay from '@/components/QRCode/QRCodeDisplay/QRCodeDisplay.vue'
 
 @Component({
   components: {
     TransactionDetails,
     FormProfileUnlock,
     HardwareConfirmationButton,
+    QRCodeDisplay,
   },
   computed: {
     ...mapGetters({
       currentAccount: 'account/currentAccount',
+      networkType: 'network/networkType',
+      generationHash: 'network/generationHash',
     }),
   },
 })
@@ -52,7 +65,12 @@ export class ModalTransactionCosignatureTs extends Vue {
   @Prop({
     default: null,
   })
-  transaction: AggregateTransaction
+  transactionHash: string
+
+  /**
+   * Aggregate transaction fetched by transactionHash
+   */
+  transaction: AggregateTransaction = null
 
   /**
    * Currently active account
@@ -60,6 +78,15 @@ export class ModalTransactionCosignatureTs extends Vue {
    * @var {AccountModel}
    */
   public currentAccount: AccountModel
+
+  public networkType: NetworkType
+
+  public generationHash: string
+
+  /**
+   * Whether transaction has expired
+   */
+  public expired: boolean = false
 
   /// region computed properties
   /**
@@ -91,20 +118,49 @@ export class ModalTransactionCosignatureTs extends Vue {
   public get needsCosignature(): boolean {
     //IS THIS CORRECT? Multisig accounts cannot sign?
     const currentPubAccount = AccountModel.getObjects(this.currentAccount).publicAccount
-    return !this.transaction.signedByAccount(currentPubAccount)
+    return !this.transaction?.signedByAccount(currentPubAccount)
   }
 
   public get cosignatures(): AggregateTransactionCosignature[] {
-    return this.transaction.cosignatures
+    return this.transaction?.cosignatures
   }
+
   public get hasMissSignatures(): boolean {
     //merkleComponentHash ==='000000000000...' present that the transaction is still lack of signature
     return (
-      this.transaction.transactionInfo != null &&
-      this.transaction.transactionInfo.merkleComponentHash !== undefined &&
-      this.transaction.transactionInfo.merkleComponentHash.startsWith('000000000000')
+      this.transaction?.transactionInfo != null &&
+      this.transaction?.transactionInfo.merkleComponentHash !== undefined &&
+      this.transaction?.transactionInfo.merkleComponentHash.startsWith('000000000000')
     )
   }
+
+  public get cosignatureQrCode(): CosignatureQR {
+    // @ts-ignore
+    return new CosignatureQR(this.transaction, this.networkType, this.generationHash)
+  }
+
+  @Watch('transactionHash', { immediate: true })
+  public async fetchTransaction() {
+    try {
+      // first get the last status
+      const transactionStatus: TransactionStatus = (await this.$store.dispatch('transaction/FETCH_TRANSACTION_STATUS', {
+        transactionHash: this.transactionHash,
+      })) as TransactionStatus
+
+      if (transactionStatus.group != 'failed') {
+        // fetch the transaction by using the status
+        this.transaction = (await this.$store.dispatch('transaction/LOAD_TRANSACTION_DETAILS', {
+          group: transactionStatus.group,
+          transactionHash: this.transactionHash,
+        })) as AggregateTransaction
+      } else {
+        this.expired = true
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   /**
    * Hook called when child component FormProfileUnlock emits
    * the 'success' event.

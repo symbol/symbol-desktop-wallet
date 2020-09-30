@@ -5,6 +5,11 @@ import { NotificationType } from '@/core/utils/NotificationType'
 @Component
 export class ButtonCopyToClipboardTs extends Vue {
   @Prop({ default: null }) value: string
+
+  @Prop({ default: 'button' }) type: 'button' | 'image' | 'icon'
+
+  @Prop({ default: 'mnemonic_copy' }) readonly tooltipText!: string
+
   copyToClipboard() {
     const value: any = this.value
     if (value) {

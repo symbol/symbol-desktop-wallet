@@ -14,7 +14,7 @@
  *
  */
 // external dependencies
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 // child components
 import { ValidationObserver } from 'vee-validate'
 // @ts-ignore
@@ -77,8 +77,8 @@ export class MosaicAttachmentInputTs extends Vue {
    * @protected
    * @type {{mosaicHex: string, amount: number}}
    */
-  protected chosenValue: { mosaicHex: string; amount: number } = {
-    ...this.mosaicAttachment,
+  protected get chosenValue(): { mosaicHex: string; amount: number } {
+    return this.mosaicAttachment
   }
 
   /**
@@ -117,7 +117,7 @@ export class MosaicAttachmentInputTs extends Vue {
    */
   public formItems = {
     selectedMosaicHex: '',
-    relativeAmount: 0,
+    relativeAmount: this.chosenValue?.amount | 0,
   }
 
   get selectedMosaic(): string {
@@ -143,8 +143,14 @@ export class MosaicAttachmentInputTs extends Vue {
 
     return true
   }
+  /// end-region computed properties getter/setter
+
   mounted() {
     this.emitChange()
   }
-  /// end-region computed properties getter/setter
+
+  @Watch('mosaicAttachment')
+  public onMosaicAttachmentChange(mosaicAttachment: { mosaicHex: string; amount: number }) {
+    this.relativeAmount = mosaicAttachment.amount
+  }
 }

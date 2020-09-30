@@ -43,6 +43,9 @@ import { NamespaceModel } from '@/core/database/entities/NamespaceModel'
 import { MosaicModel } from '@/core/database/entities/MosaicModel'
 import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel'
 import { AccountModel } from '@/core/database/entities/AccountModel'
+import { Signer } from '@/store/Account'
+// @ts-ignore
+import SignerFilter from '@/components/SignerFilter/SignerFilter.vue'
 
 @Component({
   components: {
@@ -51,6 +54,7 @@ import { AccountModel } from '@/core/database/entities/AccountModel'
     FormAliasTransaction,
     FormExtendNamespaceDurationTransaction,
     FormMosaicSupplyChangeTransaction,
+    SignerFilter,
   },
   computed: {
     ...mapGetters({
@@ -59,6 +63,7 @@ import { AccountModel } from '@/core/database/entities/AccountModel'
       holdMosaics: 'mosaic/holdMosaics',
       ownedNamespaces: 'namespace/ownedNamespaces',
       networkConfiguration: 'network/networkConfiguration',
+      signers: 'account/signers',
     }),
   },
 })
@@ -97,6 +102,22 @@ export class TableDisplayTs extends Vue {
   private currentHeight: number
 
   private networkConfiguration: NetworkConfigurationModel
+
+  /**
+   * current signers
+   */
+  public signers: Signer[]
+
+  /**
+   * Hook called when the signer selector has changed
+   * @protected
+   */
+  protected onSignerSelectorChange(address: string): void {
+    // clear previous account transactions
+    if (address) {
+      this.$store.dispatch('account/SET_CURRENT_SIGNER', { address: Address.createFromRawAddress(address) })
+    }
+  }
 
   /**
    * Current table sorting state

@@ -1,7 +1,7 @@
 <template>
   <div class="transfer-container secondary_page_animate">
     <div class="transfer-inner-container scroll">
-      <FormTransferTransaction />
+      <FormTransferTransaction :recipient="recipient" :show-transaction-actions="true" />
     </div>
   </div>
 </template>

@@ -9,7 +9,7 @@ import { mapGetters } from 'vuex'
     }),
   },
 })
-export class TransactionAddressFilterTs extends Vue {
+export class SignerFilterTs extends Vue {
   @Prop({ default: [] })
   public signers: Signer[]
 

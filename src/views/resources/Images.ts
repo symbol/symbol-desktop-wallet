@@ -212,7 +212,12 @@ import unlock from '@/views/resources/img/icons/unlock.png'
 import wallet from '@/views/resources/img/icons/wallet.png'
 // @ts-ignore
 import xymCoin from '@/views/resources/img/icons/xym-coin.png'
-
+// @ts-ignore
+import importPrivateKeyStepImage1 from '@/views/resources/img/login/1-3.png'
+// @ts-ignore
+import importPrivateKeyStepImage2 from '@/views/resources/img/login/2-3.png'
+// @ts-ignore
+import importPrivateKeyStepImage3 from '@/views/resources/img/login/3-3.png'
 /// region exported image objects
 export const walletTypeImages = {
   createImg,
@@ -236,6 +241,11 @@ export const createStepImage = {
   createStepImage5,
 }
 
+export const importPrivateKeyStepImage = {
+  importPrivateKeyStepImage1,
+  importPrivateKeyStepImage2,
+  importPrivateKeyStepImage3,
+}
 export const dashboardImages = {
   dashboardUnconfirmed,
   dashboardConfirmed,

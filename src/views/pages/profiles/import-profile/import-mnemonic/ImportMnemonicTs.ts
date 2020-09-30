@@ -25,12 +25,16 @@ import { Password, Crypto } from 'symbol-sdk'
 import MnemonicInput from '@/components/MnemonicInput/MnemonicInput.vue'
 import { ProfileService } from '@/services/ProfileService'
 
+//@ts-ignore
+import ImportQRButton from '@/components/QRCode/ImportQRButton/ImportQRButton.vue'
+
 @Component({
-  components: { MnemonicInput },
+  components: { MnemonicInput, ImportQRButton },
   computed: {
     ...mapGetters({
       currentProfile: 'profile/currentProfile',
       currentPassword: 'temporary/password',
+      importedMnemonic: 'temporary/mnemonic',
     }),
   },
 })
@@ -67,6 +71,12 @@ export default class ImportMnemonicTs extends Vue {
    * @type: Array<string>
    */
   public wordsArray: Array<string> = []
+
+  /**
+   * @description: initial mnemonics (imported)
+   * @type: string
+   */
+  public importedMnemonic: string
 
   /**
    * Delete profile and go back

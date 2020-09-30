@@ -47,6 +47,24 @@ export class SettingsModelStorage extends VersionedObjectStorage<Record<string, 
           return modified
         },
       },
+      {
+        description: 'Update settings for 0.10.x network (address changes)',
+        migrate: (from: any) => {
+          // update all pre-0.10.x settings
+          const settings = Object.keys(from)
+
+          const modified: any = from
+          settings.map((name: string) => {
+            modified[name] = {
+              ...modified[name],
+              explorerUrl: networkConfig.explorerUrl,
+              faucetUrl: networkConfig.faucetUrl,
+            }
+          })
+
+          return modified
+        },
+      },
     ])
   }
 }

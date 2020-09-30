@@ -52,6 +52,16 @@ export class ViewNamespaceRegistrationTransaction extends TransactionView<Namesp
           key: 'duration',
           value: TimeHelpers.durationToRelativeTime(parseInt(duration.toString()), blockGenerationTargetTime),
         },
+        {
+          key: 'estimated_rental_fee',
+          value: {
+            amount:
+              this.$store.getters['network/rentalFeeEstimation'].effectiveRootNamespaceRentalFeePerBlock.compact() *
+              this.transaction['duration'].compact(),
+            color: 'red',
+          },
+          isMosaic: true,
+        },
       ]
     }
 
@@ -60,6 +70,14 @@ export class ViewNamespaceRegistrationTransaction extends TransactionView<Namesp
       {
         key: 'parent_namespace',
         value: rootNamespaceName,
+      },
+      {
+        key: 'estimated_rental_fee',
+        value: {
+          amount: this.$store.getters['network/rentalFeeEstimation'].effectiveChildNamespaceRentalFee.compact(),
+          color: 'red',
+        },
+        isMosaic: true,
       },
     ]
   }

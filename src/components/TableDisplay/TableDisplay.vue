@@ -4,11 +4,16 @@
       <div class="table-title-container section-title">
         <slot name="table-title" />
         <div class="user-operation">
-          <Checkbox v-model="showExpired">
+          <Checkbox v-model="showExpired" class="table-filter-item-container">
             <span v-show="assetType === 'mosaic'">{{ $t('show_expired_mosaics') }}</span>
             <span v-show="assetType === 'namespace'">{{ $t('show_expired_namespaces') }}</span>
           </Checkbox>
-          <span @click="onRefresh"><Icon :class="{ 'animation-rotate': isRefreshing }" type="ios-sync" /></span>
+          <div v-if="signers.length > 1">
+            <SignerFilter :signers="signers" @signer-change="onSignerSelectorChange" />
+          </div>
+          <span class="table-filter-item-container" @click="onRefresh">
+            <Icon :class="{ 'animation-rotate': isRefreshing }" type="ios-sync" />
+          </span>
         </div>
       </div>
     </div>

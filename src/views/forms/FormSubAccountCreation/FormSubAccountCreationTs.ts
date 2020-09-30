@@ -54,6 +54,7 @@ const { MAX_SEED_ACCOUNTS_NUMBER } = appConfig.constants
       networkType: 'network/networkType',
       currentProfile: 'profile/currentProfile',
       knownAccounts: 'account/knownAccounts',
+      isPrivateKeyProfile: 'profile/isPrivateKeyProfile',
     }),
   },
 })
@@ -99,12 +100,14 @@ export class FormSubAccountCreationTs extends Vue {
    */
   public currentPassword: Password
 
+  public isPrivateKeyProfile: boolean
+
   /**
    * Form fields
    * @var {Object}
    */
   public formItems = {
-    type: 'child_account',
+    type: '',
     privateKey: '',
     name: '',
   }
@@ -122,6 +125,7 @@ export class FormSubAccountCreationTs extends Vue {
   public created() {
     this.accountService = new AccountService()
     this.paths = new DerivationService()
+    this.formItems.type = this.isPrivateKeyProfile ? 'privatekey_account' : 'child_account'
   }
 
   /// region computed properties getter/setter

@@ -7,7 +7,7 @@
         <div class="right-bottom-container xym-outline">
           <NavigationTabs direction="horizontal" :parent-route-name="parentRouteName" />
           <div class="radius bottom_router_view">
-            <router-view />
+            <router-view :key="$route.fullPath" />
           </div>
         </div>
       </div>

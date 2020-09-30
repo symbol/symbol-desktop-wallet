@@ -18,7 +18,7 @@ import { mapGetters } from 'vuex'
 import { Component, Vue } from 'vue-property-decorator'
 // child components
 // @ts-ignore
-import TransactionAddressFilter from '@/components/TransactionList/TransactionListFilters/TransactionAddressFilter/TransactionAddressFilter.vue'
+import SignerFilter from '@/components/SignerFilter/SignerFilter.vue'
 // @ts-ignore
 import TransactionStatusFilter from '@/components/TransactionList/TransactionListFilters/TransactionStatusFilter/TransactionStatusFilter.vue'
 //@ts-ignore
@@ -29,7 +29,7 @@ import { TransactionGroupState } from '@/store/Transaction'
 import { Address } from 'symbol-sdk'
 
 @Component({
-  components: { TransactionAddressFilter, TransactionStatusFilter, ButtonRefresh },
+  components: { SignerFilter, TransactionStatusFilter, ButtonRefresh },
   computed: {
     ...mapGetters({
       currentAccount: 'account/currentAccount',

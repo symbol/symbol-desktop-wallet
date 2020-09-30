@@ -11,7 +11,7 @@
           {{ $t('save_backups') }}
         </p>
         <p class="text">
-          {{ $t('don_not_share_mnemonics_with_anyone') }}
+          {{ $t('do_not_share_mnemonics_with_anyone') }}
         </p>
         <p class="text">
           {{ $t('phishing_warning') }}

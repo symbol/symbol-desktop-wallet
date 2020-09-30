@@ -15,7 +15,7 @@
  */
 import { mapGetters } from 'vuex'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { AggregateTransaction, MosaicId, Transaction } from 'symbol-sdk'
+import { AggregateTransaction, Convert, MosaicId, Transaction } from 'symbol-sdk'
 // internal dependencies
 import { AccountModel } from '@/core/database/entities/AccountModel'
 // child components
@@ -29,8 +29,9 @@ import PageTitle from '@/components/PageTitle/PageTitle.vue'
 import TransactionListFilters from '@/components/TransactionList/TransactionListFilters/TransactionListFilters.vue'
 // @ts-ignore
 import TransactionTable from '@/components/TransactionList/TransactionTable/TransactionTable.vue'
+// @ts-ignore
+import ModalTransactionExport from '@/views/modals/ModalTransactionExport/ModalTransactionExport.vue'
 import { TransactionGroupState } from '@/store/Transaction'
-
 @Component({
   components: {
     ModalTransactionCosignature,
@@ -38,6 +39,7 @@ import { TransactionGroupState } from '@/store/Transaction'
     PageTitle,
     TransactionListFilters,
     TransactionTable,
+    ModalTransactionExport,
   },
   computed: {
     ...mapGetters({
@@ -49,6 +51,7 @@ import { TransactionGroupState } from '@/store/Transaction'
       partialTransactions: 'transaction/partialTransactions',
       unconfirmedTransactions: 'transaction/unconfirmedTransactions',
       displayedTransactionStatus: 'transaction/displayedTransactionStatus',
+      generationHash: 'network/generationHash',
     }),
   },
 })
@@ -126,6 +129,13 @@ export class TransactionListTs extends Vue {
    */
   public isAwaitingCosignature: boolean = false
 
+  public generationHash: string
+  /**
+   * Whether currently viewing export
+   * @var {boolean}
+   */
+  public isViewingExportModal: boolean = false
+
   public getEmptyMessage() {
     return this.displayedTransactionStatus === TransactionGroupState.all
       ? 'no_data_transactions'
@@ -192,7 +202,26 @@ export class TransactionListTs extends Vue {
     this.isAwaitingCosignature = f
   }
 
+  public get aggregateTransactionHash() {
+    if (!this.activePartialTransaction.transactionInfo) {
+      return Transaction.createTransactionHash(
+        this.activePartialTransaction.serialize(),
+        Array.from(Convert.hexToUint8(this.generationHash)),
+      )
+    }
+    return this.activePartialTransaction.transactionInfo.hash
+  }
+
   /// end-region computed properties getter/setter
+
+  created() {
+    if (this.$route.params.transaction) {
+      // @ts-ignore
+      this.activePartialTransaction = this.$route.params.transaction as AggregateTransaction
+      this.hasCosignatureModal = true
+    }
+  }
+
   /**
    * Refresh transaction list
    * @return {void}
@@ -223,6 +252,7 @@ export class TransactionListTs extends Vue {
   public onCloseCosignatureModal() {
     this.hasCosignatureModal = false
     this.activePartialTransaction = undefined
+    this.$router.push({ name: 'dashboard.index' })
   }
 
   /**
@@ -232,5 +262,16 @@ export class TransactionListTs extends Vue {
     if (page > this.countPages) page = this.countPages
     else if (page < 1) page = 1
     this.currentPage = page
+  }
+
+  public get hasTransactionExportModal(): boolean {
+    return this.isViewingExportModal
+  }
+
+  public set hasTransactionExportModal(f: boolean) {
+    this.isViewingExportModal = f
+  }
+  public downloadTransaction() {
+    this.hasTransactionExportModal = true
   }
 }

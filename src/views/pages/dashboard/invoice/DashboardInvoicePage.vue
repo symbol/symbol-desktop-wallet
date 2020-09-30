@@ -3,7 +3,12 @@
     <div class="invoice-inner-container scroll">
       <div class="invoice-section-container">
         <div class="image-container">
-          <img id="qrImg" :src="qrCode$" alt="Transaction QR code" />
+          <QRCodeDisplay
+            :qr-code="transactionQR"
+            alt="transaction_qr_code"
+            show-download="true"
+            :download-name="'invoiceqr_' + recipient"
+          />
         </div>
         <div class="description-container">
           <div id="address_text" class="address_text top-qr-text">
@@ -26,10 +31,6 @@
           <div class="top-qr-text">
             <span class="top-qr-text-title">{{ $t('message') }}:</span>
             <span>{{ currentTransaction ? currentTransaction.message.payload : '' }}</span>
-          </div>
-
-          <div class="qr_button">
-            <span class="radius pointer" @click="onDownloadQR">{{ $t('download') }}</span>
           </div>
         </div>
       </div>

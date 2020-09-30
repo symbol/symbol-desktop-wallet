@@ -39,6 +39,9 @@ export class MaxFeeSelectorTs extends Vue {
   })
   public className: string
 
+  @Prop({ default: false })
+  public displayOnly!: boolean
+
   /**
    * Networks currency mosaic name
    * @var {string}

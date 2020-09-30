@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Modal v-model="show" :title="`${$t(title)}`" class-name="modal-container">
+    <Modal v-model="show" :title="`${$t(title)}`" class-name="modal-container" :footer-hide="hideFooter">
       <slot name="form" />
       <div slot="footer" class="modal-form-wrap-footer" />
     </Modal>
@@ -21,9 +21,15 @@ export default class ModalFormWrap extends Vue {
 
   /**
    * Modal visibility state from parent
-   * @type {string}
+   * @type {boolean}
    */
   @Prop({ default: false }) visible: boolean
+
+  /**
+   * Hide footer
+   * @type {boolean}
+   */
+  @Prop({ default: false }) hideFooter: boolean
 
   /**
    * Internal visibility state

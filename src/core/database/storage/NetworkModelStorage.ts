@@ -57,6 +57,33 @@ export class NetworkModelStorage extends VersionedNetworkBasedObjectStorage<Netw
           return modified
         },
       },
+      {
+        description: 'Update networkCache for 0.10.x network (generation hash)',
+        migrate: (from: any) => {
+          const modified: any = from
+
+          // add new network
+          modified['6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD'] = new NetworkModel(
+            'http://api-01.ap-northeast-1.0.10.0.x.symboldev.network:3000/',
+            NetworkType.TEST_NET,
+            '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD',
+            networkConfig.networkConfigurationDefaults,
+            new TransactionFees(3, 0, 1000, 0),
+            new NodeInfo(
+              '70E06C112848A652D635755B7530D3096A978321D09B8D8DC17505CAE09565C5',
+              '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD',
+              7900,
+              NetworkType.TEST_NET,
+              0,
+              [RoleType.ApiNode],
+              '',
+              'api-01-ap-northeast-1',
+            ),
+          )
+
+          return modified
+        },
+      },
     ])
   }
 }

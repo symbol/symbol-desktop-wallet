@@ -16,18 +16,14 @@
 // external dependencies
 import { Component, Vue } from 'vue-property-decorator'
 import { mapGetters } from 'vuex'
-import { concatMap, pluck } from 'rxjs/operators'
-import { Observable, of } from 'rxjs'
 import { QRCodeGenerator, TransactionQR } from 'symbol-qr-library'
 import { Address, NetworkType, TransferTransaction } from 'symbol-sdk'
 import { MosaicAttachment } from '@/views/forms/FormTransferTransaction/FormTransferTransactionTs.ts'
 // child components
 // @ts-ignore
 import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue'
-
-// resources
 // @ts-ignore
-import failureIcon from '@/views/resources/img/monitor/failure.png'
+import QRCodeDisplay from '@/components/QRCode/QRCodeDisplay/QRCodeDisplay.vue'
 
 export interface ITransactionEntry {
   transaction: TransferTransaction
@@ -37,24 +33,13 @@ export interface ITransactionEntry {
 @Component({
   components: {
     FormTransferTransaction,
+    QRCodeDisplay,
   },
   computed: {
     ...mapGetters({
       networkType: 'network/networkType',
       generationHash: 'network/generationHash',
     }),
-  },
-  subscriptions() {
-    const qrCode$ = this.$watchAsObservable('transactionQR', {
-      immediate: true,
-    }).pipe(
-      pluck('newValue'),
-      concatMap((args) => {
-        if (args instanceof TransactionQR) return args.toBase64()
-        return of(failureIcon)
-      }),
-    )
-    return { qrCode$ }
   },
 })
 export class DashboardInvoicePageTs extends Vue {
@@ -64,12 +49,6 @@ export class DashboardInvoicePageTs extends Vue {
    * @var {NetworkType}
    */
   public networkType: NetworkType
-
-  /**
-   * Transaction QR code
-   * @type {Observable<string>}
-   */
-  public qrCode$: Observable<string>
 
   /**
    * Network's generation hash
@@ -165,27 +144,5 @@ export class DashboardInvoicePageTs extends Vue {
    */
   public onInvoiceChange(transactions: ITransactionEntry[]) {
     Vue.set(this, 'transactions', transactions)
-  }
-
-  /**
-   * Hook called when the download QR button is pressed
-   * @return {void}
-   */
-  public onDownloadQR() {
-    if (!this.transactionQR) return
-
-    // - read QR code base64
-    const QRCode: any = document.querySelector('#qrImg')
-    if (!QRCode) return
-    const url = QRCode.src
-
-    // - create link (<a>)
-    const a = document.createElement('a')
-    const event = new MouseEvent('click')
-    a.download = `qr_receive_${this.recipient}`
-    a.href = url
-
-    // - start download
-    a.dispatchEvent(event)
   }
 }

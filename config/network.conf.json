@@ -1,6 +1,6 @@
 {
-  "explorerUrl": "http://explorer-97x.symboldev.network/",
-  "faucetUrl": "http://faucet-97x-01.symboldev.network/",
+  "explorerUrl": "http://explorer-0.10.0.x-01.symboldev.network/",
+  "faucetUrl": "http://faucet-0.10.0.x-01.symboldev.network/",
   "defaultNetworkType": 152,
   "defaultNodeUrl": "http://api-01.us-east-1.0.10.0.x.symboldev.network:3000",
   "networkConfigurationDefaults": {

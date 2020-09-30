@@ -52,6 +52,8 @@ import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirm
 import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue'
 import { MosaicModel } from '@/core/database/entities/MosaicModel'
 import { NamespaceModel } from '@/core/database/entities/NamespaceModel'
+// @ts-ignore
+import SignerSelector from '@/components/SignerSelector/SignerSelector.vue'
 
 @Component({
   components: {
@@ -66,6 +68,7 @@ import { NamespaceModel } from '@/core/database/entities/NamespaceModel'
     MaxFeeSelector,
     ModalTransactionConfirmation,
     MaxFeeAndSubmit,
+    SignerSelector,
   },
   computed: {
     ...mapGetters({
@@ -104,6 +107,7 @@ export class FormAliasTransactionTs extends FormTransactionBase {
     aliasTarget: null,
     aliasAction: null,
     maxFee: 0,
+    signerAddress: '',
   }
 
   /**
@@ -172,6 +176,10 @@ export class FormAliasTransactionTs extends FormTransactionBase {
     //     staged => staged.type === TransactionType.MOSAIC_ALIAS || staged.type ===
     // TransactionType.ADDRESS_ALIAS, ) this.setTransactions([transaction as AliasTransaction])
     // this.isAwaitingSignature = true return }
+
+    this.formItems.signerAddress = this.selectedSigner
+      ? this.selectedSigner.address.plain()
+      : this.currentAccount.address
 
     /**
      * Helper function to get the alias target as a string

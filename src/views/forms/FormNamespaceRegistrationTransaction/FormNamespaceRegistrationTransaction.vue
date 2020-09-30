@@ -57,7 +57,10 @@
             target-asset="namespace"
             :show-relative-time="true"
           />
-
+          <RentalFee
+            :rental-type="formItems.registrationType === typeRootNamespace ? 'root-namespace' : 'child-namespace'"
+            :duration="formItems.duration"
+          />
           <MaxFeeAndSubmit v-model="formItems.maxFee" @button-clicked="handleSubmit(onSubmit)" />
         </form>
       </ValidationObserver>
