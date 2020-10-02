@@ -153,10 +153,10 @@
       <p class="text">
         {{ $t('profile_description_tips1') }}
       </p>
-      <p class="text">
+      <p v-if="!isLedger" class="text">
         {{ $t('profile_description_tips2') }}
       </p>
-      <p class="text red">
+      <p v-if="!isLedger" class="text red">
         {{ $t('profile_description_tips3') }}
       </p>
     </div>

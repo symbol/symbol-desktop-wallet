@@ -15,6 +15,8 @@
  */
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Account, Password } from 'symbol-sdk'
+import { mapGetters } from 'vuex'
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel'
 // internal dependencies
 // child components
 // @ts-ignore
@@ -23,6 +25,11 @@ import FormProfileUnlock from '@/views/forms/FormProfileUnlock/FormProfileUnlock
 @Component({
   components: {
     FormProfileUnlock,
+  },
+  computed: {
+    ...mapGetters({
+      currentAccount: 'account/currentAccount',
+    }),
   },
 })
 export class ModalFormProfileUnlockTs extends Vue {
@@ -59,9 +66,20 @@ export class ModalFormProfileUnlockTs extends Vue {
    * @param {Password} password
    * @return {void}
    */
-  public onAccountUnlocked(payload: { account: Account; password: Password }) {
+
+  public currentAccount: AccountModel
+
+  public get isLedger(): boolean {
+    return this.currentAccount.type == AccountType.fromDescriptor('Ledger')
+  }
+
+  public onAccountUnlocked(payload: { account: Account; addr: any; password: Password }) {
     // - log about unlock success
-    this.$store.dispatch('diagnostic/ADD_INFO', `Account ${payload.account.address.plain()} unlocked successfully.`)
+    if (!this.isLedger) {
+      this.$store.dispatch('diagnostic/ADD_INFO', `Account ${payload.account.address.plain()} unlocked successfully.`)
+    } else {
+      this.$store.dispatch('diagnostic/ADD_INFO', `Account ${payload.addr.plain()} unlocked successfully.`)
+    }
 
     // - emit success
     this.$emit('success', payload.account.publicAccount)

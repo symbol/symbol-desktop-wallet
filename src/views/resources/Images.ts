@@ -42,6 +42,10 @@ import createStepImage4 from '@/views/resources/img/login/4_5.png'
 // @ts-ignore
 import createStepImage5 from '@/views/resources/img/login/5_5.png'
 // @ts-ignore
+import accessLedgerStepImage1 from '@/views/resources/img/login/1_2.png'
+// @ts-ignore
+import accessLedgerStepImage2 from '@/views/resources/img/login/2_2.png'
+// @ts-ignore
 import dashboardUnconfirmed from '@/views/resources/img/monitor/dash-board/dashboardUnconfirmed.png'
 // @ts-ignore
 import dashboardConfirmed from '@/views/resources/img/monitor/dash-board/dashboardConfirmed.png'
@@ -246,6 +250,12 @@ export const importPrivateKeyStepImage = {
   importPrivateKeyStepImage2,
   importPrivateKeyStepImage3,
 }
+
+export const accessLedgerStepImage = {
+  accessLedgerStepImage1,
+  accessLedgerStepImage2,
+}
+
 export const dashboardImages = {
   dashboardUnconfirmed,
   dashboardConfirmed,

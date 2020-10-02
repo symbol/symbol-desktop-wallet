@@ -35,11 +35,13 @@
     }
   ],
   "dependencies": {
+    "@ledgerhq/hw-transport-webusb": "^5.16.0",
     "animate.css": "^3.7.2",
     "await-lock": "^2.0.1",
     "axios": "^0.19.0",
     "file-saver": "^2.0.2",
     "json2csv": "^5.0.1",
+    "bip32-path": "^0.4.2",
     "request": "^2.88.0",
     "rss-parser": "^3.7.3",
     "rxjs": "^6.5.2",

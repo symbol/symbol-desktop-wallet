@@ -21,6 +21,7 @@ export class AccountType {
   public static readonly PRIVATE_KEY = 2
   public static readonly KEYSTORE = 3
   public static readonly TREZOR = 4
+  public static readonly LEDGER = 5
 
   public static fromDescriptor(descriptor: string) {
     switch (descriptor) {
@@ -33,6 +34,8 @@ export class AccountType {
         return AccountType.SEED
       case 'Trezor':
         return AccountType.TREZOR
+      case 'Ledger':
+        return AccountType.LEDGER
     }
   }
 }

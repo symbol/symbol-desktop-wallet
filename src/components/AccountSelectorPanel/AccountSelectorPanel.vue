@@ -31,7 +31,7 @@
     </div>
 
     <div class="account-switch-footer-container">
-      <span v-if="!isPrivateKeyProfile" class="add-account pointer" @click="hasAddAccountModal = true">
+      <span v-if="!!isShowAddAccount" class="add-account pointer" @click="hasAddAccountModal = true">
         <Icon type="md-add-circle" />{{ $t('button_add_account') }}
       </span>
       <div

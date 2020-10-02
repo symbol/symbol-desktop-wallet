@@ -15,7 +15,7 @@
  */
 import { Component, Vue } from 'vue-property-decorator'
 import { mapGetters } from 'vuex'
-import { Password } from 'symbol-sdk'
+import { Password, PublicAccount } from 'symbol-sdk'
 // internal dependencies
 import { ValidationRuleset } from '@/core/validation/ValidationRuleset'
 import { NotificationType } from '@/core/utils/NotificationType'
@@ -31,6 +31,11 @@ import FormWrapper from '@/components/FormWrapper/FormWrapper.vue'
 import FormRow from '@/components/FormRow/FormRow.vue'
 import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper'
 import { FilterHelpers } from '@/core/utils/FilterHelpers'
+import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage'
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel'
+import TransportWebUSB from '@ledgerhq/hw-transport-webusb'
+import { SymbolLedger } from '@/core/utils/Ledger'
+import { AccountService } from '@/services/AccountService'
 
 /// end-region custom types
 
@@ -58,6 +63,20 @@ export class FormProfileCreationTs extends Vue {
   public currentProfile: ProfileModel
 
   /**
+   * Currently active profile
+   * @see {Store.Profile}
+   * @var {string}
+   */
+  public profileService: ProfileService
+
+  isLedger = false
+  created() {
+    this.profileService = new ProfileService()
+    const { isLedger } = this.$route.meta
+    this.isLedger = isLedger
+  }
+
+  /**
    * Currently active network type
    * @see {Store.Network}
    * @var {string}
@@ -69,6 +88,12 @@ export class FormProfileCreationTs extends Vue {
    * @var {ProfileService}
    */
   public accountService = new ProfileService()
+
+  /**
+   * Ledger Accounts repository
+   * @var {ProfileService}
+   */
+  public ledgerAccountService = new AccountService()
 
   /**
    * Validation rules
@@ -154,8 +179,30 @@ export class FormProfileCreationTs extends Vue {
     this.$store.dispatch('temporary/SET_PASSWORD', this.formItems.password)
     this.$store.dispatch('notification/ADD_SUCCESS', NotificationType.OPERATION_SUCCESS)
 
-    // flush and continue
-    this.$router.push({ name: this.nextPage })
+    if (!this.isLedger) {
+      // flush and continue
+      this.$router.push({ name: this.nextPage })
+    } else {
+      this.importDefaultLedgerAccount(this.formItems.networkType)
+        .then((res) => {
+          this.ledgerAccountService.saveAccount(res)
+          // - update app state
+          this.$store.dispatch('profile/ADD_ACCOUNT', res)
+          this.$store.dispatch('account/SET_CURRENT_ACCOUNT', res)
+          this.$store.dispatch('account/SET_KNOWN_ACCOUNTS', [res.id])
+          this.$store.dispatch('temporary/RESET_STATE')
+          this.$store.dispatch('notification/ADD_SUCCESS', NotificationType.OPERATION_SUCCESS)
+          this.$router.push({ name: 'profiles.accessLedger.finalize' })
+        })
+        .catch((error) => {
+          {
+            console.error(error)
+            this.$Notice.error({
+              title: this['$t']('CONDITIONS_OF_USE_NOT_SATISFIED') + '',
+            })
+          }
+        })
+    }
   }
 
   /**
@@ -164,5 +211,45 @@ export class FormProfileCreationTs extends Vue {
   public stripTagsProfile() {
     this.formItems.profileName = FilterHelpers.stripFilter(this.formItems.profileName)
     this.formItems.hint = FilterHelpers.stripFilter(this.formItems.hint)
+  }
+
+  /**
+   * Get a account instance of Ledger from default path
+   * @return {AccountModel}
+   */
+  private async importDefaultLedgerAccount(networkType: number): Promise<AccountModel> {
+    const profileName = this.formItems.profileName
+    this.$Notice.success({
+      title: this['$t']('Verify information in your device!') + '',
+    })
+    const transport = await TransportWebUSB.create()
+    const symbolLedger = new SymbolLedger(transport, 'XYM')
+    const appSupported = await symbolLedger.isAppSupported()
+    if (!appSupported) {
+      this.$Notice.info({
+        title: this['$t']('Please update your Symbol BOLOS app!') + '',
+      })
+      return null
+    }
+    const accountResult = await symbolLedger.getAccount(AccountService.DEFAULT_ACCOUNT_PATH, networkType, true)
+    const { publicKey } = accountResult
+    const address = PublicAccount.createFromPublicKey(publicKey, networkType).address
+    transport.close()
+
+    // add account to list
+    const accName = this.currentProfile.profileName
+
+    return {
+      id: SimpleObjectStorage.generateIdentifier(),
+      name: accName,
+      profileName: profileName,
+      node: '',
+      type: AccountType.fromDescriptor('Ledger'),
+      address: address.plain(),
+      publicKey: publicKey.toUpperCase(),
+      encryptedPrivateKey: '',
+      path: AccountService.DEFAULT_ACCOUNT_PATH,
+      isMultisig: false,
+    }
   }
 }

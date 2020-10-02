@@ -47,7 +47,7 @@ export default class ImportStrategyTs extends Vue {
       image: walletTypeImages.ledgerImg,
       title: 'access_ledger',
       description: 'access_your_ledger_account',
-      route: null,
+      route: 'profiles.accessLedger.info',
     },
   ]
 

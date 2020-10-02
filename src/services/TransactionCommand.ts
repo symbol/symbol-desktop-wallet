@@ -184,4 +184,38 @@ export class TransactionCommand {
     }
     return undefined
   }
+
+  public announceSimpleLedger(
+    service: TransactionAnnouncerService,
+    signedTransactions: Observable<SignedTransaction>[],
+  ): Observable<BroadcastResult>[] {
+    return signedTransactions.map((o) => o.pipe(flatMap((s) => service.announce(s))))
+  }
+
+  public announceHashAndAggregateBondedLedger(
+    service: TransactionAnnouncerService,
+    signedTransactions: Observable<SignedTransaction>[],
+  ): Observable<BroadcastResult> {
+    return signedTransactions[0].pipe(
+      flatMap((signedHashLockTransaction) => {
+        return signedTransactions[1].pipe(
+          flatMap((signedAggregateTransaction) => {
+            return service.announceHashAndAggregateBonded(signedHashLockTransaction, signedAggregateTransaction)
+          }),
+        )
+      }),
+    )
+  }
+
+  public calculateSuggestedMaxFeeLedger(transaction: Transaction): Transaction {
+    const feeMultiplier = this.resolveFeeMultipler(transaction)
+    if (!feeMultiplier) {
+      return transaction
+    }
+    if (transaction instanceof AggregateTransaction) {
+      return transaction.setMaxFeeForAggregate(feeMultiplier, this.signer.requiredCosignatures)
+    } else {
+      return transaction.setMaxFee(feeMultiplier)
+    }
+  }
 }

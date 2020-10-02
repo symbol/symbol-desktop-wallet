@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Account, Address, NetworkType, Password, SimpleWallet, Crypto } from 'symbol-sdk'
+import { Account, PublicAccount, Address, NetworkType, Password, SimpleWallet, Crypto } from 'symbol-sdk'
 import { ExtendedKey, MnemonicPassPhrase, Wallet } from 'symbol-hd-wallets'
+import TransportWebUSB from '@ledgerhq/hw-transport-webusb'
+
 // internal dependencies
 import { DerivationPathLevels, DerivationService } from './DerivationService'
 import { DerivationPathValidator } from '@/core/validation/validators'
@@ -22,6 +24,7 @@ import { AccountModel, AccountType } from '@/core/database/entities/AccountModel
 import { ProfileModel } from '@/core/database/entities/ProfileModel'
 import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage'
 import { AccountModelStorage } from '@/core/database/storage/AccountModelStorage'
+import { SymbolLedger } from '@/core/utils/Ledger'
 
 export class AccountService {
   private readonly storage = AccountModelStorage.INSTANCE
