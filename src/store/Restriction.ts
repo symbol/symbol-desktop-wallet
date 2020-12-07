@@ -84,7 +84,12 @@ export default {
 
             restrictionAccountRepository
                 .getAccountRestrictions(currentSignerAddress)
-                .subscribe(({ restrictions }) => commit('accountRestrictions', restrictions))
+                .subscribe({
+                    next: ({ restrictions }) => commit('accountRestrictions', restrictions),
+                    error: () => {
+                        commit('accountRestrictions', []);
+                    },
+                })
                 .add(() => commit('isFetchingRestrictions', false));
         },
     },
