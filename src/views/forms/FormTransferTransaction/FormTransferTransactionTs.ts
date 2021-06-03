@@ -77,6 +77,7 @@ import { FilterHelpers } from '@/core/utils/FilterHelpers';
 import { TransactionCommand } from '@/services/TransactionCommand';
 import { appConfig } from '@/config';
 import { NotificationType } from '@/core/utils/NotificationType';
+import { TransferTransactionWithToBeEncryptedMessage } from '@/core/database/entities/TransferTransactionWithToBeEncryptedMessage';
 const { DECIMAL_SEPARATOR } = appConfig.constants;
 
 export interface MosaicAttachment {
@@ -354,16 +355,28 @@ export class FormTransferTransactionTs extends FormTransactionBase {
                     return new Mosaic(new MosaicId(RawUInt64.fromHex(attachment.mosaicHex)), UInt64.fromUint(amount * Math.pow(10, div)));
                 },
             );
-        return [
-            TransferTransaction.create(
-                this.createDeadline(),
-                this.instantiatedRecipient,
-                mosaics.length ? mosaics : [],
-                this.formItems.encryptMessage ? this.encyptedMessage : PlainMessage.create(this.formItems.messagePlain || ''),
-                this.networkType,
-                UInt64.fromUint(this.formItems.maxFee),
-            ),
-        ];
+        return this.formItems.encryptMessage
+            ? [
+                  new TransferTransactionWithToBeEncryptedMessage(
+                      this.currentRecipient,
+                      this.createDeadline(),
+                      mosaics,
+                      PlainMessage.create(this.formItems.messagePlain || ''),
+                      this.networkType,
+                      this.instantiatedRecipient,
+                      UInt64.fromUint(this.formItems.maxFee),
+                  ),
+              ]
+            : [
+                  TransferTransaction.create(
+                      this.createDeadline(),
+                      this.instantiatedRecipient,
+                      mosaics.length ? mosaics : [],
+                      this.formItems.encryptMessage ? this.encyptedMessage : PlainMessage.create(this.formItems.messagePlain || ''),
+                      this.networkType,
+                      UInt64.fromUint(this.formItems.maxFee),
+                  ),
+              ];
     }
 
     /**
@@ -624,21 +637,13 @@ export class FormTransferTransactionTs extends FormTransactionBase {
             this.$store
                 .dispatch('notification/ADD_ERROR', this.$t(NotificationType.RECIPIENT_PUBLIC_KEY_INVALID_ERROR))
                 .then(() => (this.formItems.encryptMessage = isEncrypted));
-        } else if (!this.formItems.messagePlain) {
-            this.$store
-                .dispatch('notification/ADD_ERROR', this.$t(NotificationType.ENCRYPTED_MESSAGE_EMPTY_ERROR))
-                .then(() => (this.formItems.encryptMessage = isEncrypted));
         } else {
             if (this.formItems.encryptMessage) {
                 // to encrypt message
                 if (this.importTransaction) {
                     if (isEncrypted) {
                         this.formItems.messagePlain = importedTransactionMessage.payload;
-                    } else {
-                        this.hasAccountUnlockModal = true;
                     }
-                } else {
-                    this.hasAccountUnlockModal = true;
                 }
             } else {
                 // to decrypt message

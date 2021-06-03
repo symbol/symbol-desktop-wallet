@@ -15,6 +15,7 @@
  */
 // configuration
 import { appConfig } from '@/config';
+import { TransferTransactionWithToBeEncryptedMessage } from '@/core/database/entities/TransferTransactionWithToBeEncryptedMessage';
 // internal dependencies
 import { BroadcastResult } from '@/core/transactions/BroadcastResult';
 import i18n from '@/language';
@@ -24,6 +25,7 @@ import {
     Account,
     CosignatureSignedTransaction,
     CosignatureTransaction,
+    EncryptedMessage,
     IListener,
     NetworkType,
     RepositoryFactory,
@@ -31,6 +33,7 @@ import {
     Transaction,
     TransactionService,
     TransactionType,
+    TransferTransaction,
 } from 'symbol-sdk';
 import { TransactionAnnounceResponse } from 'symbol-sdk/dist/src/model/transaction/TransactionAnnounceResponse';
 import { Store } from 'vuex';
@@ -49,6 +52,23 @@ export class AccountTransactionSigner implements TransactionSigner {
     constructor(private readonly account: Account) {}
 
     signTransaction(t: Transaction, generationHash: string): Observable<SignedTransaction> {
+        if (t instanceof TransferTransactionWithToBeEncryptedMessage && t.message?.payload != null) {
+            const encryptedMessage = EncryptedMessage.create(t.message.payload, t.recipientAcount, this.account.privateKey);
+            const transactionWithEncryptedMessage = new TransferTransaction(
+                t.networkType,
+                t.version,
+                t.deadline,
+                t.maxFee,
+                t.recipientAddress,
+                t.mosaics,
+                encryptedMessage,
+                t.signature,
+                t.signer,
+                t.transactionInfo,
+            );
+            return of(this.account.sign(transactionWithEncryptedMessage, generationHash));
+        }
+
         return of(this.account.sign(t, generationHash));
     }
     signCosignatureTransaction(t: CosignatureTransaction): Observable<CosignatureSignedTransaction> {
