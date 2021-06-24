@@ -229,7 +229,8 @@ function initialize() {
         webPreferences: {
           nodeIntegration: false,
           enableRemoteModule: false,
-          preload: path.resolve(__dirname, 'preload.js')
+          preload: path.resolve(__dirname, 'preload.js'),
+          nativeWindowOpen: true, // <-- important for Trezor popup
         }
       })
     } else {
@@ -242,7 +243,8 @@ function initialize() {
         webPreferences: {
           nodeIntegration: false,
           enableRemoteModule: false,
-          preload: path.resolve(__dirname, 'preload.js')
+          preload: path.resolve(__dirname, 'preload.js'),
+          nativeWindowOpen: true, // <-- important for Trezor popup
         }
       })
     }
@@ -276,7 +278,8 @@ function initialize() {
       webPreferences: {
         nodeIntegration: false,
         enableRemoteModule: false,
-        preload: path.resolve(__dirname, 'preload.js')
+        preload: path.resolve(__dirname, 'preload.js'),
+        nativeWindowOpen: true, // <-- important for Trezor popup
       },
       resizable: true,
     }
@@ -310,11 +313,24 @@ function initialize() {
     app.quit()
   })
   app.on('web-contents-created', (e, webContents) => {
-    webContents.on('new-window', (event, url) => {
-      event.preventDefault();
-
-      if (url.match(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g)) {
+    webContents.on('new-window', (event, url, frameName, disposition, options, _additionalFeatures) => {
+      // Specific for Trezor popup (currently in localhost for dev process)
+      if (url.includes('localhost')) {
+        event.preventDefault();
+        // For small size popup
+        delete options.minWidth
+        delete options.minHeight
+        const connectPopup = new BrowserWindow(options);
+        // Make center popup
+        connectPopup.hide();
+        connectPopup.center();
+        connectPopup.show();
+        event.newGuest = connectPopup;
+      } else {
+        event.preventDefault();
+        if (url.match(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g)) {
           shell.openExternal(url)
+        }
       }
     })
   })

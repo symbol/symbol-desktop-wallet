@@ -43,6 +43,12 @@ export default class ImportStrategyTs extends Vue {
             description: 'access_your_ledger_account',
             route: 'profiles.accessLedger.info',
         },
+        {
+            image: walletTypeImages.trezorImg,
+            title: 'access_trezor',
+            description: 'access_your_trezor_account',
+            route: 'profiles.accessTrezor.info',
+        },
     ];
 
     /**

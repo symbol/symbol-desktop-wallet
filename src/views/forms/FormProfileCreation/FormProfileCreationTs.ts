@@ -67,12 +67,14 @@ export class FormProfileCreationTs extends Vue {
     public profileService: ProfileService;
 
     isLedger = false;
+    isTrezor = false;
 
     created() {
         this.profileService = new ProfileService();
         this.formItems.networkType = NetworkType.MAIN_NET;
-        const { isLedger } = this.$route.meta;
+        const { isLedger, isTrezor } = this.$route.meta;
         this.isLedger = isLedger;
+        this.isTrezor = isTrezor;
     }
 
     /**

@@ -14,7 +14,7 @@
     "access_ledger": "使用Ledger登录",
     "access_my_profile": "进入我的账户",
     "access_trezor": "使用Trezor登录",
-    "access_trezor_account": "连接你的Trezor钱包，并进入操作",
+    "access_your_trezor_account": "连接你的Trezor钱包，并进入操作",
     "access_your_ledger_account": "连接你的Ledger钱包，并进入操作",
     "account_address": "钱包地址",
     "ACCOUNT_LINK": "帐户连结",

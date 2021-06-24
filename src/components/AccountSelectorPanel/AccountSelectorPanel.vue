@@ -85,6 +85,27 @@
                     </span>
                 </div>
             </div>
+            <div v-if="trezorAccount.length > 0" class="account-type-title">Trezor accounts</div>
+            <div
+                v-for="item in trezorAccount"
+                :key="item.id"
+                :class="['account-tile', isActiveAccount(item) ? 'active-background' : 'inactive-background', 'pointer']"
+                @click="currentAccountIdentifier = item.id"
+            >
+                <div class="mosaic_data">
+                    <span class="img_container">
+                        <img v-if="isActiveAccount(item)" src="@/views/resources/img/symbol/XYMCoin.png" alt />
+                        <img v-else src="@/views/resources/img/symbol/XYMCoin.png" class="grayed-xym-logo" />
+                    </span>
+                    <span class="mosaic_name">{{ item.name }}</span>
+
+                    <span class="mosaic_value">
+                        <span :class="['amount', 'overflow_ellipsis', 'green']">
+                            <MosaicAmountDisplay :absolute-amount="balances[item.address]" />
+                        </span>
+                    </span>
+                </div>
+            </div>
             <div v-if="pkAccounts.length > 0" class="account-type-title">Private key accounts</div>
             <div
                 v-for="item in pkAccounts"

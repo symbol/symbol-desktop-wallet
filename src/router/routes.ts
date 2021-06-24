@@ -484,6 +484,46 @@ export const routes: AppRoute[] = [
                     },
                 ],
             },
+            {
+                path: 'accessTrezor',
+                name: 'profiles.accessTrezor',
+                meta: { protected: false },
+                // @ts-ignore
+                component: () => import('@/views/pages/profiles/access-trezor/AccessTrezor.vue'),
+                children: [
+                    {
+                        path: 'info',
+                        name: 'profiles.accessTrezor.info',
+                        meta: {
+                            protected: false,
+                            isTrezor: true,
+                            nextPage: 'profiles.accessTrezor.walletSelection',
+                        },
+                        // @ts-ignore
+                        component: () => import('@/views/forms/FormProfileCreation/FormProfileCreation.vue'),
+                    },
+                    {
+                        path: 'walletChoose',
+                        name: 'profiles.accessTrezor.walletSelection',
+                        meta: {
+                            protected: false,
+                            isTrezor: true,
+                        },
+                        // @ts-ignore
+                        component: () => import('@/views/pages/profiles/access-trezor/account-selection/AccountSelection.vue'),
+                    },
+                    {
+                        path: 'finishCreate',
+                        name: 'profiles.accessTrezor.finalize',
+                        meta: {
+                            protected: false,
+                            isTrezor: true,
+                        },
+                        // @ts-ignore
+                        component: () => import('@/views/pages/profiles/access-trezor/finalize/Finalize.vue'),
+                    },
+                ],
+            },
         ],
     },
     {

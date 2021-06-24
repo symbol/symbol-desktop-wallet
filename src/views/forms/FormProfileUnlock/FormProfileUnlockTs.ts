@@ -112,12 +112,16 @@ export class FormProfileUnlockTs extends Vue {
         return this.currentAccount.type === AccountType.LEDGER || this.currentAccount.type === AccountType.LEDGER_OPT_IN;
     }
 
+    public get isTrezor(): boolean {
+        return this.currentAccount.type === AccountType.TREZOR;
+    }
+
     public accountService = new ProfileService();
 
     public processVerification() {
         try {
             const password = new Password(this.formItems.password);
-            if (this.isLedger) {
+            if (this.isLedger || this.isTrezor) {
                 const passwordHash = ProfileService.getPasswordHash(password);
                 // read account's password hash and compare
                 const currentProfile = this.accountService.getProfileByName(this.currentAccount.profileName);

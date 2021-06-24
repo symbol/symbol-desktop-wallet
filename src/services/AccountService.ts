@@ -23,6 +23,7 @@ import { ProfileModel } from '@/core/database/entities/ProfileModel';
 import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage';
 import { AccountModelStorage } from '@/core/database/storage/AccountModelStorage';
 import { LedgerService } from '@/services/LedgerService';
+import { TrezorService } from '@/services/TrezorService';
 import { NodeModel } from '@/core/database/entities/NodeModel';
 
 export class AccountService {
@@ -464,6 +465,99 @@ export class AccountService {
     ): Promise<AccountModel> {
         const defaultPath = AccountService.getAccountPathByNetworkType(networkType);
         return await this.getLedgerAccountByPath(currentProfile, networkType, defaultPath, false, isOptinLedgerWallet);
+    }
+
+    /**
+     * Get list of accounts from Trezor device
+     * @param {NetworkType} networkType
+     * @param {number} count
+     * @return {Promise<string[]>}
+     */
+    public async getTrezorAccounts(networkType: NetworkType, count: number = 10): Promise<PublicAccount[]> {
+        const derivationService = new DerivationService(networkType);
+
+        const default_path = AccountService.getAccountPathByNetworkType(networkType);
+        // increment derivation path \a count times
+        const paths = [...Array(count).keys()].map((index) => {
+            if (index == 0) {
+                return default_path;
+            }
+
+            return derivationService.incrementPathLevel(default_path, DerivationPathLevels.Profile, index);
+        });
+        const publicKeys: string[] = await this.getTrezorPublicKeyByPaths(networkType, paths, false);
+
+        return publicKeys.map((publicKey) => PublicAccount.createFromPublicKey(publicKey, networkType));
+    }
+
+    /**
+     * Derive Trezor public keys from Trezor device by paths
+     * @param {NetworkType} networkType
+     * @param {string} paths
+     * @param {boolean} trezorDisplay
+     * @return {Promise<string>}
+     */
+    public async getTrezorPublicKeyByPaths(networkType: NetworkType, paths: string[], trezorDisplay: boolean): Promise<string[]> {
+        for (const path of paths) {
+            if (!DerivationPathValidator.validate(path, networkType)) {
+                const errorMessage = 'Invalid derivation path: ' + path;
+                console.error(errorMessage);
+                throw new Error(errorMessage);
+            }
+        }
+
+        const trezorService = new TrezorService(networkType);
+        const result = await trezorService.getAccounts(paths, trezorDisplay);
+        return result;
+    }
+
+    /**
+     * Derive an account instance of Trezor device using a path
+     * @param {ProfileModel} currentProfile
+     * @param {NetworkType} networkType
+     * @param {string} paths
+     * @param {boolean} trezorDisplay
+     * @return {Promise<AccountModel>}
+     */
+    public async getTrezorAccountByPath(
+        currentProfile: ProfileModel,
+        networkType: NetworkType,
+        path: string,
+        trezorDisplay: boolean,
+    ): Promise<AccountModel> {
+        const publicKey = await this.getTrezorPublicKeyByPath(networkType, path, trezorDisplay);
+        const address = PublicAccount.createFromPublicKey(publicKey.toUpperCase(), networkType).address;
+        return {
+            id: SimpleObjectStorage.generateIdentifier(),
+            profileName: currentProfile.profileName,
+            name: currentProfile.profileName,
+            node: '',
+            type: AccountType.TREZOR,
+            address: address.plain(),
+            publicKey: publicKey.toUpperCase(),
+            encryptedPrivateKey: '',
+            path: path,
+            isMultisig: false,
+        };
+    }
+
+    /**
+     * Derive an public key from Trezor device using a path
+     * @param {NetworkType} networkType
+     * @param {string} paths
+     * @param {boolean} trezorDisplay
+     * @return {Promise<string>}
+     */
+    public async getTrezorPublicKeyByPath(networkType: NetworkType, path: string, trezorDisplay: boolean): Promise<string> {
+        if (!DerivationPathValidator.validate(path, networkType)) {
+            const errorMessage = 'Invalid derivation path: ' + path;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
+        }
+
+        const trezorService = new TrezorService(networkType);
+        const result = await trezorService.getAccount(path, trezorDisplay);
+        return result;
     }
 
     /**

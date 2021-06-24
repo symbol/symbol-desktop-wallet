@@ -189,8 +189,12 @@ export class ModalFormSubAccountCreationTs extends Vue {
         return this.currentAccount.type === AccountType.LEDGER || this.currentAccount.type === AccountType.LEDGER_OPT_IN;
     }
 
+    public get isTrezor(): boolean {
+        return this.currentAccount.type === AccountType.TREZOR;
+    }
+
     public get isPrivateKeyAccount(): boolean {
-        return this.isPrivateKeyProfile && !this.isLedger;
+        return this.isPrivateKeyProfile && !this.isLedger && !this.isTrezor;
     }
 
     /// end-region computed properties getter/setter
@@ -234,6 +238,30 @@ export class ModalFormSubAccountCreationTs extends Vue {
             }
         }
         this.$store.dispatch('notification/ADD_ERROR', this.$t('add_account_failed', { reason: error.message || error }));
+    }
+
+    /**
+     * Trezor popup error notification handler
+     */
+    private trezorErrorNotificationHandler(error: any) {
+        if (typeof error === 'string') {
+            switch (error) {
+                case 'Popup closed':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_popup_closed');
+                    return;
+                case 'Cancelled':
+                case 'Permissions not granted':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_user_reject_request');
+                    return;
+                case 'Device call in process':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_existed_popup_openning');
+                    return;
+                case 'Transport is missing':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_bridge_missing');
+                    return;
+            }
+        }
+        this.$store.dispatch('notification/ADD_ERROR', this.$t('trezor_popup_common_error', { reason: error.message || error }));
     }
 
     /**
@@ -338,6 +366,20 @@ export class ModalFormSubAccountCreationTs extends Vue {
                     .catch((error) => {
                         this.errorNotificationHandler(error);
                     });
+            } else if (this.isTrezor) {
+                this.importSubAccountFromTrezor(childAccountName)
+                    .then((res) => {
+                        this.accountService.saveAccount(res);
+                        // - update app state
+                        this.$store.dispatch('profile/ADD_ACCOUNT', res);
+                        this.$store.dispatch('account/SET_CURRENT_ACCOUNT', res);
+                        this.$store.dispatch('account/SET_KNOWN_ACCOUNTS', this.currentProfile.accounts);
+                        this.$store.dispatch('notification/ADD_SUCCESS', NotificationType.OPERATION_SUCCESS);
+                        this.$emit('submit', this.formItems);
+                    })
+                    .catch((error) => {
+                        this.trezorErrorNotificationHandler(error);
+                    });
             } else {
                 // - get next path
                 const nextPath = this.paths.getNextAccountPath(this.knownPaths);
@@ -408,6 +450,34 @@ export class ModalFormSubAccountCreationTs extends Vue {
             throw error;
         }
     }
+
+    async importSubAccountFromTrezor(childAccountName: string): Promise<AccountModel> | null {
+        try {
+            const accountService = new AccountService();
+            const nextPath = this.paths.getNextAccountPath(this.knownPaths);
+            const publicKey = await accountService.getTrezorPublicKeyByPath(this.currentProfile.networkType, nextPath, false);
+            const address = PublicAccount.createFromPublicKey(publicKey, this.currentProfile.networkType).address;
+            return {
+                id: SimpleObjectStorage.generateIdentifier(),
+                name: childAccountName,
+                profileName: this.currentProfile.profileName,
+                node: '',
+                type: AccountType.fromDescriptor('Trezor'),
+                address: address.plain(),
+                publicKey: publicKey.toUpperCase(),
+                encryptedPrivateKey: '',
+                path: nextPath,
+                isMultisig: false,
+            };
+        } catch (error) {
+            this.$store.dispatch('SET_UI_DISABLED', {
+                isDisabled: false,
+                message: '',
+            });
+            throw error;
+        }
+    }
+
     public get isValidName(): boolean {
         if (!this.formItems.name) {
             return false;

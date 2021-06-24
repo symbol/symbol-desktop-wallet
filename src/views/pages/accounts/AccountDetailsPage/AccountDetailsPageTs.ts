@@ -178,6 +178,30 @@ export class AccountDetailsPageTs extends Vue {
         }
     }
 
+    /**
+     * Trezor popup error notification handler
+     */
+    private trezorErrorNotificationHandler(error: any) {
+        if (typeof error === 'string') {
+            switch (error) {
+                case 'Popup closed':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_popup_closed');
+                    return;
+                case 'Cancelled':
+                case 'Permissions not granted':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_user_reject_request');
+                    return;
+                case 'Device call in progress':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_existed_popup_openning');
+                    return;
+                case 'Transport is missing':
+                    this.$store.dispatch('notification/ADD_ERROR', 'trezor_bridge_missing');
+                    return;
+            }
+        }
+        this.$store.dispatch('notification/ADD_ERROR', this.$t('trezor_popup_common_error', { reason: error.message || error }));
+    }
+
     public async showAddressLedger() {
         try {
             const networkType = this.currentProfile.networkType;
@@ -207,6 +231,22 @@ export class AccountDetailsPageTs extends Vue {
         }
     }
 
+    public async showAddressTrezor() {
+        try {
+            const networkType = this.currentProfile.networkType;
+            const currentPath = this.currentAccount.path;
+            const currentAccount = await this.accountService.getTrezorAccountByPath(this.currentProfile, networkType, currentPath, true);
+            const accountPublicKey = currentAccount.publicKey.toUpperCase();
+            if (accountPublicKey === this.currentAccount.publicKey.toUpperCase()) {
+                this.$store.dispatch('notification/ADD_SUCCESS', 'trezor_correct_account');
+            } else {
+                this.$store.dispatch('notification/ADD_ERROR', 'trezor_not_correct_account');
+            }
+        } catch (error) {
+            this.trezorErrorNotificationHandler(error);
+        }
+    }
+
     public async deleteAccount() {
         this.showConfirmationModal = false;
         if (this.currentAccount) {
@@ -225,6 +265,10 @@ export class AccountDetailsPageTs extends Vue {
 
     public get isLedger(): boolean {
         return this.currentAccount.type === AccountType.LEDGER || this.currentAccount.type === AccountType.LEDGER_OPT_IN;
+    }
+
+    public get isTrezor(): boolean {
+        return this.currentAccount.type === AccountType.TREZOR;
     }
 
     public get isOptinAccount(): boolean {

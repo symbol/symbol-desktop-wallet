@@ -1,0 +1,148 @@
+@import '../../../../resources/css/variables.less';
+
+.account-selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: @purpleDark;
+    width: 100%;
+
+    .dialog-title {
+        font-size: @biggerFont;
+        color: rgba(51, 51, 51);
+        padding: 0 0 10px 0;
+        padding: 0.1rem;
+        width: 100%;
+        text-align: start;
+    }
+
+    .dialog-sub-tips {
+        font-size: 22px;
+        color: @purpleDark;
+        padding: 0.1rem;
+        font-weight: bolder;
+    }
+
+    .choose-hd-path {
+        position: relative;
+        width: 100%;
+        height: 80%;
+        padding: 10px 0;
+    }
+
+    .hd-path {
+        font-size: 20px;
+        padding: 10px 30px;
+        border-bottom: 1px solid rgba(224, 223, 229);
+
+        .hd-path-title {
+            margin-right: 40px;
+            color: rgba(51, 51, 51);
+        }
+
+        .hd-path-type,
+        .hd-path-value {
+            color: rgba(136, 136, 136);
+            line-height: 17px;
+        }
+    }
+
+    .address-list {
+        font-size: 16px;
+        min-height: 300px;
+
+        .scroll {
+            max-height: 520px;
+        }
+
+        .table-item,
+        .table-title {
+            padding: 5px 14px;
+            color: @purpleDark;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title .address-id {
+            position: relative;
+            left: 20px;
+        }
+
+        .table-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e0dfe5;
+        }
+
+        .table-item:hover {
+            color: #1fb6ac;
+            background-color: rgba(38, 180, 176, 0.1);
+        }
+
+        .table-item:last-of-type {
+            border-bottom: 1px solid transparent;
+        }
+
+        .address-id {
+            width: 140px;
+            position: relative;
+            left: 30px;
+            font-size: 20px;
+
+            img {
+                width: 20px;
+                height: 20px;
+                position: relative;
+                left: 20px;
+            }
+        }
+
+        .address-value {
+            width: 450px;
+            font-size: 20px;
+        }
+
+        .address-balance {
+            font-size: 20px;
+            width: 120px;
+        }
+    }
+
+    .button-container {
+        display: flex;
+        margin-top: 40px;
+        align-items: flex-end;
+        justify-content: flex-end;
+        width: 100%;
+
+        button {
+            margin-left: 16px;
+            padding-left: 0.4rem;
+            padding-right: 0.4rem;
+        }
+    }
+
+    .selection-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        font-size: 20px;
+
+        .network-type {
+            display: inline-block;
+            height: 30px;
+            line-height: 30px;
+            width: 40%;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+    }
+}
+
+.button {
+    width: 150px;
+}
+
+.table-body {
+    height: 4.1rem;
+}

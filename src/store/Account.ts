@@ -77,6 +77,7 @@ interface AccountState {
     subscriptions: Record<string, SubscriptionType[]>;
     currentRecipient: PublicAccount;
     currentAccountAliases: AccountNames[];
+    publicKeyList: string[];
     addressesList: Address[];
     optInAddressesList: { address: Address; index: number }[];
     selectedAddressesToInteract: number[];
@@ -105,6 +106,7 @@ const accountState: AccountState = {
     subscriptions: {},
     currentRecipient: null,
     multisigAccountGraph: null,
+    publicKeyList: [],
     addressesList: [],
     optInAddressesList: [],
     selectedAddressesToInteract: [],
@@ -146,6 +148,7 @@ export default {
         currentRecipient: (state: AccountState) => state.currentRecipient,
         currentAccountAliases: (state: AccountState) => state.currentAccountAliases,
         multisigAccountGraph: (state: AccountState) => state.multisigAccountGraph,
+        publicKeyList: (state: AccountState) => state.publicKeyList,
         addressesList: (state: AccountState) => state.addressesList,
         optInAddressesList: (state: AccountState) => state.optInAddressesList,
         selectedAddressesToInteract: (state: AccountState) => state.selectedAddressesToInteract,
@@ -227,6 +230,9 @@ export default {
             // update state
             Vue.set(state.subscriptions, address, newSubscriptions);
         },
+        publicKeyList: (state: AccountState, publicKeyList: string[]) => {
+            state.publicKeyList = publicKeyList;
+        },
         addressesList: (state: AccountState, addressesList: Address[]) => {
             state.addressesList = addressesList;
         },
@@ -254,6 +260,9 @@ export default {
             const indexToDelete = selectedAccounts.indexOf(pathNumber);
             selectedAccounts.splice(indexToDelete, 1);
             state.selectedAddressesOptInToInteract = selectedAccounts;
+        },
+        resetPublicKeyList: (state: AccountState) => {
+            state.publicKeyList = [];
         },
         resetAddressesList: (state: AccountState) => {
             state.addressesList = [];

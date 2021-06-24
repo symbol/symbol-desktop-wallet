@@ -32,6 +32,7 @@ export interface RouteMeta {
     // @TODO: REVIEW
     clickable?: boolean;
     isLedger?: boolean;
+    isTrezor?: boolean;
     icon?: unknown;
     active?: boolean;
     nextPage?: string;

@@ -28,7 +28,7 @@
                             <AccountPublicKeyDisplay :account="currentAccount" />
                         </div>
 
-                        <div v-if="!isLedger" class="detail-row">
+                        <div v-if="!(isLedger || isTrezor)" class="detail-row">
                             <ProtectedPrivateKeyDisplay :account="currentAccount" />
                         </div>
 
@@ -77,6 +77,14 @@
                                     @click="showAddressLedger"
                                 >
                                     {{ $t('show_on_ledger') }}
+                                </button>
+                                <button
+                                    v-if="isTrezor"
+                                    type="button"
+                                    class="centered-button button-style button solid-button buttonC"
+                                    @click="showAddressTrezor"
+                                >
+                                    {{ $t('show_on_trezor') }}
                                 </button>
                                 <button
                                     type="button"

@@ -193,6 +193,10 @@ export class AccountSelectorPanelTs extends Vue {
         return this.knownAccounts.filter((_) => _.type === AccountType.LEDGER_OPT_IN);
     }
 
+    public get trezorAccount(): AccountModel[] {
+        return this.knownAccounts.filter((_) => _.type === AccountType.TREZOR);
+    }
+
     public get hasAddAccountModal(): boolean {
         return this.isAddingAccount;
     }

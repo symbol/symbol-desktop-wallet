@@ -16,7 +16,7 @@
                                             <Option v-else value="child_account">
                                                 {{ $t('option_child_account') }}
                                             </Option>
-                                            <Option v-if="!isLedger" value="privatekey_account">
+                                            <Option v-if="!(isLedger || isTrezor)" value="privatekey_account">
                                                 {{ $t('option_privatekey_account') }}
                                             </Option>
                                         </Select>
