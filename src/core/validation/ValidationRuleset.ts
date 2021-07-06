@@ -17,32 +17,27 @@
 import { appConfig } from '@/config';
 import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
 
-import { networkConfig } from '@/config';
-import { NetworkType } from 'symbol-sdk';
-
 const { MIN_PASSWORD_LENGTH } = appConfig.constants;
 
-export const createValidationRuleSet = ({
-    maxMessageSize,
-    maxMosaicAtomicUnits,
-    maxMosaicDivisibility,
-    maxMosaicDuration,
-    minNamespaceDuration,
-}: NetworkConfigurationModel) => {
-    return {
+export const createValidationRuleSet = (
+    configuration: NetworkConfigurationModel | undefined,
+): Record<
+    string,
+    | string
+    | {
+          required?: boolean;
+          regex: string;
+      }
+> => {
+    const standaloneValidationRules = {
         address: 'required|address|addressNetworkType:currentProfile',
         profilePassword: 'required|profilePassword',
         addressOrAlias: 'required|addressOrAlias|addressOrAliasNetworkType:currentProfile',
-        amount: `positiveDecimal|maxDecimals:${maxMosaicDivisibility}|maxRelativeAmount:${[maxMosaicAtomicUnits, maxMosaicDivisibility]}`,
+
         confirmPassword: 'required|confirmPassword:@newPassword',
         divisibility: 'required|min_value:0|max_value:6|integer',
-        duration: `required|min_value:0|max_value:${maxMosaicDuration}`,
         generationHash: 'required|min:64|max:64',
         mosaicId: 'required|mosaicId',
-        message: `maxMessage:${maxMessageSize}`,
-        namespaceDuration: `required|min_value:${
-            minNamespaceDuration / networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.blockGenerationTargetTime
-        }|maxNamespaceDuration`,
         // remove symbol from regex when rest https://github.com/nemtech/catapult-rest/issues/631 fixed
         namespaceName: {
             required: true,
@@ -56,7 +51,6 @@ export const createValidationRuleSet = ({
         previousPassword: 'required|confirmLock:cipher',
         privateKey: 'min:64|max:64|privateKey',
         recipientPublicKey: 'required|publicKey',
-        supply: `required|integer|min_value: 1|max_value:${maxMosaicAtomicUnits}`,
         url: 'required|url',
         newAccountName: 'required|newAccountName',
         profileAccountName: 'required|profileAccountName',
@@ -69,8 +63,21 @@ export const createValidationRuleSet = ({
             regex: '^(?!\\s*$).+',
         },
     };
-};
+    const networkValidationRules = configuration
+        ? {
+              duration: `required|min_value:0|max_value:${configuration.maxMosaicDuration}`,
+              supply: `required|integer|min_value: 1|max_value:${configuration.maxMosaicAtomicUnits}`,
 
-// TODO ValidationRuleset needs to be created when the network configuration is resolved, UI needs
-// to use the resolved ValidationResulset ATM rules are using the hardocded ones
-export const ValidationRuleset = createValidationRuleSet(networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults);
+              amount: `positiveDecimal|maxDecimals:${configuration.maxMosaicDivisibility}|maxRelativeAmount:${[
+                  configuration.maxMosaicAtomicUnits,
+                  configuration.maxMosaicDivisibility,
+              ]}`,
+              message: `maxMessage:${configuration.maxMessageSize}`,
+              namespaceDuration: `required|min_value:${
+                  configuration.minNamespaceDuration / configuration.blockGenerationTargetTime
+              }|maxNamespaceDuration`,
+          }
+        : {};
+
+    return { ...standaloneValidationRules, ...networkValidationRules };
+};

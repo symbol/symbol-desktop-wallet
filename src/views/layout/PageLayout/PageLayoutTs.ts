@@ -13,46 +13,45 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { NetworkType } from 'symbol-sdk';
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { AccountService } from '@/services/AccountService';
+//@ts-ignore
+import AccountLinks from '@/components/AccountLinks/AccountLinks.vue';
+// @ts-ignore
+import AccountSelectorField from '@/components/AccountSelectorField/AccountSelectorField.vue';
 // child components
 // @ts-ignore
 import AppLogo from '@/components/AppLogo/AppLogo.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
+import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+//@ts-ignore
+import LogoutButton from '@/components/LogoutButton/LogoutButton.vue';
+// @ts-ignore
 import PageNavigator from '@/components/PageNavigator/PageNavigator.vue';
 // @ts-ignore
-import WindowControls from '@/components/WindowControls/WindowControls.vue';
-// @ts-ignore
 import PeerSelector from '@/components/PeerSelector/PeerSelector.vue';
+//@ts-ignore
+import Settings from '@/components/Settings/Settings.vue';
 // @ts-ignore
-import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
-// @ts-ignore
-import AccountSelectorField from '@/components/AccountSelectorField/AccountSelectorField.vue';
+import WindowControls from '@/components/WindowControls/WindowControls.vue';
+import { AccountModel } from '@/core/database/entities/AccountModel';
+import { HarvestingModel } from '@/core/database/entities/HarvestingModel';
+// internal dependencies
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { URLInfo } from '@/core/utils/URLInfo';
+import i18n from '@/language';
+import { AccountService } from '@/services/AccountService';
+import { HarvestingStatus } from '@/store/Harvesting';
+import { ConnectingToNodeInfo } from '@/store/Network';
 // @ts-ignore
 //import DebugConsoleButton from '@/components/DebugConsoleButton/DebugConsoleButton.vue';
 import ModalDebugConsole from '@/views/modals/ModalDebugConsole/ModalDebugConsole.vue';
-//@ts-ignore
-import Settings from '@/components/Settings/Settings.vue';
-//@ts-ignore
-import LogoutButton from '@/components/LogoutButton/LogoutButton.vue';
-import { URLInfo } from '@/core/utils/URLInfo';
+import { officialIcons } from '@/views/resources/Images';
+import { NetworkType } from 'symbol-sdk';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 //@ts-ignore
 const ImportQRButton = () => import('@/components/QRCode/ImportQRButton/ImportQRButton.vue');
-import { AccountModel } from '@/core/database/entities/AccountModel';
-//@ts-ignore
-import AccountLinks from '@/components/AccountLinks/AccountLinks.vue';
-import { officialIcons } from '@/views/resources/Images';
-import { ConnectingToNodeInfo } from '@/store/Network';
-
-import i18n from '@/language';
-import { HarvestingStatus } from '@/store/Harvesting';
-import { HarvestingModel } from '@/core/database/entities/HarvestingModel';
 
 @Component({
     components: {
@@ -231,18 +230,20 @@ export class PageLayoutTs extends Vue {
         this.isDisplayingDebugConsole = f;
     }
 
-    public get explorerUrl() {
+    public get explorerUrl(): string | undefined {
+        if (!this.explorerBaseUrl) {
+            return undefined;
+        }
         return this.currentAccount
             ? this.explorerBaseUrl.replace(/\/+$/, '') + '/accounts/' + this.currentAccount.address
             : this.explorerBaseUrl;
     }
 
-    public get faucetUrl() {
+    public get faucetUrl(): string | undefined {
+        if (!this.faucetBaseUrl) {
+            return undefined;
+        }
         return this.currentAccount ? this.faucetBaseUrl + '?recipient=' + this.currentAccount.address : this.faucetBaseUrl;
-    }
-
-    public get isTestnet() {
-        return this.networkType === NetworkType.TEST_NET;
     }
 
     public get faucetIcon() {

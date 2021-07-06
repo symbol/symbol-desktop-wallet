@@ -14,35 +14,33 @@
  *
  */
 // external dependencies
-import { MosaicId, MosaicSupplyChangeAction, MosaicSupplyChangeTransaction, Transaction, UInt64 } from 'symbol-sdk';
-import { Component, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-
-import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
-// @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
-import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
-// @ts-ignore
-import SupplyInput from '@/components/SupplyInput/SupplyInput.vue';
 // @ts-ignore
 import DivisibilityInput from '@/components/DivisibilityInput/DivisibilityInput.vue';
 // @ts-ignore
 import DurationInput from '@/components/DurationInput/DurationInput.vue';
 // @ts-ignore
-import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
 // @ts-ignore
 import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
-import { MosaicModel } from '@/core/database/entities/MosaicModel';
 // @ts-ignore
 import MosaicSelector from '@/components/MosaicSelector/MosaicSelector.vue';
+// @ts-ignore
+import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
+// @ts-ignore
+import SupplyInput from '@/components/SupplyInput/SupplyInput.vue';
+import { MosaicModel } from '@/core/database/entities/MosaicModel';
+import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
+// @ts-ignore
+import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+import { MosaicId, MosaicSupplyChangeAction, MosaicSupplyChangeTransaction, Transaction, UInt64 } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -92,11 +90,6 @@ export class FormMosaicSupplyChangeTransactionTs extends FormTransactionBase {
         default: () => ({}),
     })
     value: any;
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    protected validationRules = ValidationRuleset;
 
     /**
      * Mosaic supply change enum

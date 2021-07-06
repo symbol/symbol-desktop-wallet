@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Address, MetadataType, PublicAccount, RepositoryFactory, Transaction } from 'symbol-sdk';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
+// @ts-ignore
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
 // @ts-ignore
 import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
 // @ts-ignore
@@ -30,24 +29,22 @@ import MosaicSelector from '@/components/MosaicSelector/MosaicSelector.vue';
 import NamespaceSelector from '@/components/NamespaceSelector/NamespaceSelector.vue';
 // @ts-ignore
 import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
-// @ts-ignore
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// @ts-ignore
-import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
-
-import { TransactionCommandMode } from '@/services/TransactionCommand';
 import { AccountModel } from '@/core/database/entities/AccountModel';
+import { MetadataModel } from '@/core/database/entities/MetadataModel';
 import { MosaicModel } from '@/core/database/entities/MosaicModel';
 import { NamespaceModel } from '@/core/database/entities/NamespaceModel';
 import { AddressValidator } from '@/core/validation/validators';
+import { MosaicService } from '@/services/MosaicService';
+import { TransactionCommandMode } from '@/services/TransactionCommand';
 import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
-
+// @ts-ignore
+import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+import { Address, MetadataType, PublicAccount, RepositoryFactory, Transaction } from 'symbol-sdk';
 // child components
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import { Component, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { MetadataModel } from '@/core/database/entities/MetadataModel';
-import { MosaicService } from '@/services/MosaicService';
+
 @Component({
     components: {
         ValidationObserver,
@@ -142,12 +139,6 @@ export class FormMetadataCreationTs extends FormTransactionBase {
         scopedKey: '',
         maxFee: 0,
     };
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Known accounts

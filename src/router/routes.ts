@@ -541,6 +541,25 @@ export const routes: AppRoute[] = [
         component: () => import('@/views/pages/privacy/PrivacyPolicy.vue'),
     },
     {
+        path: '/newNetwork',
+        name: 'newNetwork',
+        meta: { protected: false, hideFromMenu: true },
+        // @ts-ignore
+        component: () => import('@/views/layout/RouterPage.vue'),
+        children: [
+            {
+                path: '/connectToNewNetwork',
+                name: 'connectToNewNetwork.create',
+                meta: {
+                    protected: false,
+                    title: 'connect_to_new_network',
+                },
+                // @ts-ignore
+                component: () => import('@/views/pages/network/ConnectToNewNetwork.vue'),
+            },
+        ],
+    },
+    {
         path: '/terms',
         name: 'terms',
         meta: { protected: false, hideFromMenu: true },

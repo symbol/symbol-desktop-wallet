@@ -1,47 +1,47 @@
-import { Component } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// @ts-ignore
-import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue';
-// @ts-ignore
-import FormNamespaceRegistrationTransaction from '@/views/forms/FormNamespaceRegistrationTransaction/FormNamespaceRegistrationTransaction.vue';
-// @ts-ignore
-import FormMosaicDefinitionTransaction from '@/views/forms/FormMosaicDefinitionTransaction/FormMosaicDefinitionTransaction.vue';
-import {
-    TransferTransaction,
-    PlainMessage,
-    UInt64,
-    Address,
-    NetworkType,
-    Transaction,
-    NamespaceId,
-    PublicAccount,
-    MosaicDefinitionTransaction,
-    MosaicNonce,
-    MosaicId,
-    MosaicFlags,
-    NamespaceRegistrationTransaction,
-    MosaicSupplyChangeAction,
-    MosaicSupplyChangeTransaction,
-} from 'symbol-sdk';
-import { AccountModel } from '@/core/database/entities/AccountModel';
-import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
-// @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper';
-import { ValidationObserver } from 'vee-validate';
-// @ts-ignore
-import MaxFeeSelector from '@/components/MaxFeeSelector/MaxFeeSelector.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
-import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+import FormWrapper from '@/components/FormWrapper/FormWrapper';
+// @ts-ignore
+import MaxFeeSelector from '@/components/MaxFeeSelector/MaxFeeSelector.vue';
+// @ts-ignore
+import NavigationTabs from '@/components/NavigationTabs/NavigationTabs.vue';
+import { AccountModel } from '@/core/database/entities/AccountModel';
 import { AddressValidator, AliasValidator } from '@/core/validation/validators';
 import { TransactionCommand, TransactionCommandMode } from '@/services/TransactionCommand';
 // @ts-ignore
-import ModalTransactionEdit from '@/views/modals/ModalTransactionEdit/ModalTransactionEdit.vue';
-// @ts-ignore
-import NavigationTabs from '@/components/NavigationTabs/NavigationTabs.vue';
+import FormMosaicDefinitionTransaction from '@/views/forms/FormMosaicDefinitionTransaction/FormMosaicDefinitionTransaction.vue';
 // @ts-ignore
 import FormMosaicSupplyChangeTransaction from '@/views/forms/FormMosaicSupplyChangeTransaction/FormMosaicSupplyChangeTransaction.vue';
+// @ts-ignore
+import FormNamespaceRegistrationTransaction from '@/views/forms/FormNamespaceRegistrationTransaction/FormNamespaceRegistrationTransaction.vue';
+import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
+// @ts-ignore
+import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue';
+// @ts-ignore
+import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+// @ts-ignore
+import ModalTransactionEdit from '@/views/modals/ModalTransactionEdit/ModalTransactionEdit.vue';
+import {
+    Address,
+    MosaicDefinitionTransaction,
+    MosaicFlags,
+    MosaicId,
+    MosaicNonce,
+    MosaicSupplyChangeAction,
+    MosaicSupplyChangeTransaction,
+    NamespaceId,
+    NamespaceRegistrationTransaction,
+    NetworkType,
+    PlainMessage,
+    PublicAccount,
+    Transaction,
+    TransferTransaction,
+    UInt64,
+} from 'symbol-sdk';
+import { ValidationObserver } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {

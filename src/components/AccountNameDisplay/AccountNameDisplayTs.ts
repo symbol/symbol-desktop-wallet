@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { ValidationProvider } from 'vee-validate';
-
-// internal dependencies
-import { AccountModel } from '@/core/database/entities/AccountModel';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-
-// child components
-// @ts-ignore
-import ModalFormAccountNameUpdate from '@/views/modals/ModalFormAccountNameUpdate/ModalFormAccountNameUpdate.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormLabel from '@/components/FormLabel/FormLabel.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+// internal dependencies
+import { AccountModel } from '@/core/database/entities/AccountModel';
+// child components
+// @ts-ignore
+import ModalFormAccountNameUpdate from '@/views/modals/ModalFormAccountNameUpdate/ModalFormAccountNameUpdate.vue';
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -36,7 +34,7 @@ import FormLabel from '@/components/FormLabel/FormLabel.vue';
         FormLabel,
     },
 })
-export class AccountNameDisplayTs extends Vue {
+export class AccountNameDisplayTs extends ValidatedComponent {
     @Prop({
         default: null,
     })
@@ -52,12 +50,6 @@ export class AccountNameDisplayTs extends Vue {
      * @var {boolean}
      */
     public isEditingName: boolean = false;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /// region computed properties getter/setter
     public get hasNameFormModal(): boolean {

@@ -1,18 +1,18 @@
 // external dependencies
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-
+// @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
 // internal dependencies
 // @ts-ignore
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { NodeModel } from '@/core/database/entities/NodeModel';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NotificationType } from '@/core/utils/NotificationType';
 import { URLHelpers } from '@/core/utils/URLHelpers';
 import { AccountInfo, NetworkType, NodeInfo, RepositoryFactoryHttp, RoleType } from 'symbol-sdk';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { networkConfig } from '@/config';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+
 @Component({
     components: {
         FormWrapper,
@@ -25,6 +25,7 @@ import { networkConfig } from '@/config';
             networkType: 'network/networkType',
             currentProfile: 'profile/currentProfile',
             currentSignerAccountInfo: 'account/currentSignerAccountInfo',
+            networkModel: 'network/networkModel',
         }),
     },
 })
@@ -75,6 +76,7 @@ export class NetworkNodeSelectorTs extends Vue {
 
     private hideList: boolean = false;
     private currentSignerAccountInfo: AccountInfo;
+    public networkModel: NetworkModel;
     /**
      * Checks if the given node is eligible for harvesting
      * @protected
@@ -143,8 +145,7 @@ export class NetworkNodeSelectorTs extends Vue {
 
     public async created() {
         // add static hardcoded nodes to harvesting list
-        const staticNodesUrls = [];
-        networkConfig[this.networkType].nodes.map((node) => staticNodesUrls.push(node.url.replace(/http:|:3000|\//g, '')));
+        const staticNodesUrls = this.networkModel.nodes.map((node) => node.url.replace(/http:|:3000|\//g, ''));
 
         // add selected nodes
         const currentNodeUrl = this.currentProfile.selectedNodeUrlToConnect.replace(/http:|:3000|\//g, '');
@@ -214,7 +215,9 @@ export class NetworkNodeSelectorTs extends Vue {
         if (this.includeRoles && this.includeRoles.length > 0) {
             // exclude ngl nodes that doesn't support harvesting
             return this.peerNodes.filter(
-                (node) => node.roles?.some((role) => this.isIncluded(role)) && node.networkIdentifier === this.networkType,
+                (node) =>
+                    node.roles?.some((role) => this.isIncluded(role)) &&
+                    node.networkGenerationHashSeed === this.networkModel.generationHash,
             );
         }
         return this.peerNodes;

@@ -14,47 +14,36 @@
  *
  */
 
-export interface NodeConfig {
-    roles: number;
-    friendlyName: string;
-    url: string;
-}
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { NamespaceId, NetworkType } from 'symbol-sdk';
 
-export interface NetworkConfigurationDefaults {
-    maxTransactionsPerAggregate: number;
-    maxMosaicDuration: number;
-    lockedFundsPerAggregate: string;
-    maxNamespaceDuration: number;
-    maxCosignatoriesPerAccount: number;
-    maxMosaicAtomicUnits: number;
-    blockGenerationTargetTime: number;
-    currencyMosaicId: string;
-    namespaceGracePeriodDuration: number;
-    harvestingMosaicId: string;
-    minNamespaceDuration: number;
-    maxCosignedAccountsPerAccount: number;
-    maxNamespaceDepth: number;
-    defaultDynamicFeeMultiplier: number;
-    maxMosaicDivisibility: number;
-    maxMessageSize: number;
-    epochAdjustment: number;
-    totalChainImportance: number;
-    generationHash: string;
-}
-
-export interface NetworkConfig {
-    faucetUrl: string;
-    nodes: NodeConfig[];
-    defaultNetworkType: number;
-    explorerUrl: string;
-    networkConfigurationDefaults: NetworkConfigurationDefaults;
-}
-
-export const defaultTestnetNetworkConfig: NetworkConfig = {
+// DO NOT USE THIS CONST. See NetworkModel
+export const defaultTestnetNetworkConfig: NetworkModel = {
     explorerUrl: 'http://explorer.testnet.symboldev.network/',
     faucetUrl: 'http://faucet.testnet.symboldev.network/',
-    defaultNetworkType: 152,
-    networkConfigurationDefaults: {
+    name: 'Symbol Testnet',
+    networkType: NetworkType.TEST_NET,
+    generationHash: '3B5E1FA6445653C971A50687E75E6D09FB30481055E3990C84B25E9222DC1155',
+    transactionFees: {
+        averageFeeMultiplier: 84587,
+        medianFeeMultiplier: 100,
+        highestFeeMultiplier: 1136363,
+        lowestFeeMultiplier: 0,
+        minFeeMultiplier: 100,
+    },
+    networkCurrencies: {
+        networkCurrency: {
+            mosaicIdHex: '091F837E059AE13C',
+            namespaceIdHex: new NamespaceId('symbol.xym').toHex(),
+            namespaceIdFullname: 'symbol.xym',
+            ticker: 'XYM',
+            divisibility: 6,
+            transferable: true,
+            supplyMutable: false,
+            restrictable: false,
+        },
+    },
+    networkConfiguration: {
         maxMosaicDivisibility: 6,
         namespaceGracePeriodDuration: 86400,
         lockedFundsPerAggregate: '10000000',
@@ -73,24 +62,45 @@ export const defaultTestnetNetworkConfig: NetworkConfig = {
         defaultDynamicFeeMultiplier: 100,
         epochAdjustment: 1616694977,
         totalChainImportance: 7842928625000000,
-        generationHash: '3B5E1FA6445653C971A50687E75E6D09FB30481055E3990C84B25E9222DC1155',
     },
     nodes: [
-        { friendlyName: 'ngl-dual-001', roles: 2, url: 'http://ngl-dual-001.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-101', roles: 2, url: 'http://ngl-dual-101.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-201', roles: 2, url: 'http://ngl-dual-201.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-301', roles: 2, url: 'http://ngl-dual-301.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-401', roles: 2, url: 'http://ngl-dual-401.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-501', roles: 2, url: 'http://ngl-dual-501.testnet.symboldev.network:3000' },
-        { friendlyName: 'ngl-dual-601', roles: 2, url: 'http://ngl-dual-601.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-001', url: 'http://ngl-dual-001.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-101', url: 'http://ngl-dual-101.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-201', url: 'http://ngl-dual-201.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-301', url: 'http://ngl-dual-301.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-401', url: 'http://ngl-dual-401.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-501', url: 'http://ngl-dual-501.testnet.symboldev.network:3000' },
+        { friendlyName: 'ngl-dual-601', url: 'http://ngl-dual-601.testnet.symboldev.network:3000' },
     ],
 };
 
-export const defaultMainnetNetworkConfig: NetworkConfig = {
+// DO NOT USE THIS CONST. See NetworkModel
+export const defaultMainnetNetworkConfig: NetworkModel = {
+    name: 'Symbol Mainnet',
     explorerUrl: 'http://explorer.symbolblockchain.io/',
     faucetUrl: 'http://faucet.mainnet.symboldev.network/',
-    defaultNetworkType: 104,
-    networkConfigurationDefaults: {
+    networkType: NetworkType.MAIN_NET,
+    generationHash: '57F7DA205008026C776CB6AED843393F04CD458E0AA2D9F1D5F31A402072B2D6',
+    transactionFees: {
+        averageFeeMultiplier: 84587,
+        medianFeeMultiplier: 100,
+        highestFeeMultiplier: 1136363,
+        lowestFeeMultiplier: 0,
+        minFeeMultiplier: 100,
+    },
+    networkCurrencies: {
+        networkCurrency: {
+            mosaicIdHex: '6BED913FA20223F8',
+            namespaceIdHex: new NamespaceId('symbol.xym').toHex(),
+            namespaceIdFullname: 'symbol.xym',
+            ticker: 'xym',
+            divisibility: 6,
+            transferable: true,
+            supplyMutable: false,
+            restrictable: false,
+        },
+    },
+    networkConfiguration: {
         maxMosaicDivisibility: 6,
         namespaceGracePeriodDuration: 2592000,
         lockedFundsPerAggregate: '10000000',
@@ -109,52 +119,56 @@ export const defaultMainnetNetworkConfig: NetworkConfig = {
         defaultDynamicFeeMultiplier: 100,
         epochAdjustment: 1615853185,
         totalChainImportance: 7842928625000000,
-        generationHash: '57F7DA205008026C776CB6AED843393F04CD458E0AA2D9F1D5F31A402072B2D6',
     },
     nodes: [
-        { friendlyName: 'ngl-dual-001', roles: 2, url: 'http://ngl-dual-001.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-002', roles: 2, url: 'http://ngl-dual-002.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-003', roles: 2, url: 'http://ngl-dual-003.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-004', roles: 2, url: 'http://ngl-dual-004.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-005', roles: 2, url: 'http://ngl-dual-005.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-101', roles: 2, url: 'http://ngl-dual-101.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-102', roles: 2, url: 'http://ngl-dual-102.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-103', roles: 2, url: 'http://ngl-dual-103.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-104', roles: 2, url: 'http://ngl-dual-104.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-105', roles: 2, url: 'http://ngl-dual-105.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-201', roles: 2, url: 'http://ngl-dual-201.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-202', roles: 2, url: 'http://ngl-dual-202.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-203', roles: 2, url: 'http://ngl-dual-203.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-204', roles: 2, url: 'http://ngl-dual-204.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-205', roles: 2, url: 'http://ngl-dual-205.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-301', roles: 2, url: 'http://ngl-dual-301.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-302', roles: 2, url: 'http://ngl-dual-302.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-303', roles: 2, url: 'http://ngl-dual-303.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-304', roles: 2, url: 'http://ngl-dual-304.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-305', roles: 2, url: 'http://ngl-dual-305.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-401', roles: 2, url: 'http://ngl-dual-401.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-402', roles: 2, url: 'http://ngl-dual-402.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-403', roles: 2, url: 'http://ngl-dual-403.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-404', roles: 2, url: 'http://ngl-dual-404.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-405', roles: 2, url: 'http://ngl-dual-405.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-501', roles: 2, url: 'http://ngl-dual-501.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-502', roles: 2, url: 'http://ngl-dual-502.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-503', roles: 2, url: 'http://ngl-dual-503.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-504', roles: 2, url: 'http://ngl-dual-504.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-505', roles: 2, url: 'http://ngl-dual-505.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-601', roles: 2, url: 'http://ngl-dual-601.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-602', roles: 2, url: 'http://ngl-dual-602.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-603', roles: 2, url: 'http://ngl-dual-603.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-604', roles: 2, url: 'http://ngl-dual-604.symbolblockchain.io:3000' },
-        { friendlyName: 'ngl-dual-605', roles: 2, url: 'http://ngl-dual-605.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-001', url: 'http://ngl-dual-001.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-002', url: 'http://ngl-dual-002.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-003', url: 'http://ngl-dual-003.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-004', url: 'http://ngl-dual-004.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-005', url: 'http://ngl-dual-005.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-101', url: 'http://ngl-dual-101.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-102', url: 'http://ngl-dual-102.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-103', url: 'http://ngl-dual-103.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-104', url: 'http://ngl-dual-104.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-105', url: 'http://ngl-dual-105.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-201', url: 'http://ngl-dual-201.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-202', url: 'http://ngl-dual-202.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-203', url: 'http://ngl-dual-203.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-204', url: 'http://ngl-dual-204.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-205', url: 'http://ngl-dual-205.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-301', url: 'http://ngl-dual-301.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-302', url: 'http://ngl-dual-302.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-303', url: 'http://ngl-dual-303.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-304', url: 'http://ngl-dual-304.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-305', url: 'http://ngl-dual-305.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-401', url: 'http://ngl-dual-401.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-402', url: 'http://ngl-dual-402.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-403', url: 'http://ngl-dual-403.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-404', url: 'http://ngl-dual-404.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-405', url: 'http://ngl-dual-405.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-501', url: 'http://ngl-dual-501.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-502', url: 'http://ngl-dual-502.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-503', url: 'http://ngl-dual-503.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-504', url: 'http://ngl-dual-504.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-505', url: 'http://ngl-dual-505.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-601', url: 'http://ngl-dual-601.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-602', url: 'http://ngl-dual-602.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-603', url: 'http://ngl-dual-603.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-604', url: 'http://ngl-dual-604.symbolblockchain.io:3000' },
+        { friendlyName: 'ngl-dual-605', url: 'http://ngl-dual-605.symbolblockchain.io:3000' },
     ],
 };
 
-const defaultNetworkConfig: Record<number, NetworkConfig> = {
-    152: defaultTestnetNetworkConfig,
-    104: defaultMainnetNetworkConfig,
-};
+// A special build can inject a new configuration using the 'window.networkConfig' global var.
+const networkConfig: Record<string, NetworkModel> = window['networkConfig'] || {};
 
-const resolvedNetworkConfig: NetworkConfig = window['networkConfig'] || defaultNetworkConfig;
-console.log('networkConfig resolved!', resolvedNetworkConfig);
-export const networkConfig = resolvedNetworkConfig;
+// If the user hasn't provided with any custom networkConfiguration, add the public as default.
+if (!Object.keys(networkConfig).length) {
+    networkConfig[defaultMainnetNetworkConfig.generationHash] = defaultMainnetNetworkConfig;
+    networkConfig[defaultTestnetNetworkConfig.generationHash] = defaultTestnetNetworkConfig;
+}
+
+// DO NOT USE THIS METHOD. See NetworkModel
+export function getNetworkConfigs(): NetworkModel[] {
+    return Object.values(networkConfig);
+}

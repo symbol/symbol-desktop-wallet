@@ -16,27 +16,22 @@
 /// region custom types
 import { NetworkType } from 'symbol-sdk';
 
-type NetworkNodeEntry = { value: NetworkType; label: string };
-
 export class NetworkTypeHelper {
-    /**
-     * Network types with their names
-     */
-    public static networkTypeList: NetworkNodeEntry[] = [
-        { value: NetworkType.MAIN_NET, label: 'Symbol Mainnet' },
-        { value: NetworkType.TEST_NET, label: 'Symbol Testnet' },
-    ];
-
-    /**
-     * Getter for network type label
-     * @param {NetworkType} networkType
-     * @return {string}
-     */
-    public static getNetworkTypeLabel(networkType: NetworkType): string {
-        const findType = NetworkTypeHelper.networkTypeList.find((n) => n.value === networkType);
-        if (findType === undefined) {
-            return '';
+    public static getNetworkTypeName(networkType: NetworkType): string {
+        switch (networkType) {
+            case NetworkType.MAIN_NET:
+                return 'MAINNET';
+            case NetworkType.TEST_NET:
+                return 'TESTNET';
+            case NetworkType.MIJIN:
+                return 'MIJIN';
+            case NetworkType.MIJIN_TEST:
+                return 'MIJIN_TEST';
+            case NetworkType.PRIVATE:
+                return 'PRIVATE';
+            case NetworkType.PRIVATE_TEST:
+                return 'PRIVATE';
         }
-        return findType.label;
+        return 'UNKNOWN';
     }
 }

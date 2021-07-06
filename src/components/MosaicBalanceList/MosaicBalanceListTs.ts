@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { MosaicId, NamespaceId } from 'symbol-sdk';
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
 // internal dependencies
 // @ts-ignore
 import MosaicAmountDisplay from '@/components/MosaicAmountDisplay/MosaicAmountDisplay.vue';
-// resources
-import { dashboardImages } from '@/views/resources/Images';
-import { MosaicService } from '@/services/MosaicService';
+import { AccountModel } from '@/core/database/entities/AccountModel';
 import { AccountMosaicConfigurationModel } from '@/core/database/entities/MosaicConfigurationModel';
 import { MosaicModel } from '@/core/database/entities/MosaicModel';
 import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
-import { AccountModel } from '@/core/database/entities/AccountModel';
+import { MosaicService } from '@/services/MosaicService';
+// resources
+import { dashboardImages } from '@/views/resources/Images';
+import { MosaicId, NamespaceId } from 'symbol-sdk';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 export interface BalanceEntry {
     id: MosaicId;
@@ -86,7 +86,7 @@ export class MosaicBalanceListTs extends Vue {
 
     public currentHeight: number;
 
-    private networkConfiguration: NetworkConfigurationModel;
+    private networkConfiguration: NetworkConfigurationModel | undefined;
 
     /// region computed properties getter/setter
     /**
@@ -111,16 +111,18 @@ export class MosaicBalanceListTs extends Vue {
      * @type {BalanceEntry[]}
      */
     get allBalanceEntries(): BalanceEntry[] {
-        return this.balanceEntries.filter((entry) => {
-            // calculate expiration
-            const expiration = MosaicService.getExpiration(
-                entry.mosaic,
-                this.currentHeight,
-                this.networkConfiguration.blockGenerationTargetTime,
-            );
-            // skip if mosaic is expired
-            return expiration !== 'expired';
-        });
+        return this.networkConfiguration
+            ? this.balanceEntries.filter((entry) => {
+                  // calculate expiration
+                  const expiration = MosaicService.getExpiration(
+                      entry.mosaic,
+                      this.currentHeight,
+                      this.networkConfiguration.blockGenerationTargetTime,
+                  );
+                  // skip if mosaic is expired
+                  return expiration !== 'expired';
+              })
+            : [];
     }
 
     /**

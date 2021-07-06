@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { MosaicId, NetworkType } from 'symbol-sdk';
-import { ValidationProvider } from 'vee-validate';
-// internal dependencies
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-import { AccountService } from '@/services/AccountService';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
 // @ts-ignore
-import MosaicAmountDisplay from '@/components/MosaicAmountDisplay/MosaicAmountDisplay.vue';
+import AmountDisplay from '@/components/AmountDisplay/AmountDisplay.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormLabel from '@/components/FormLabel/FormLabel.vue';
+// child components
 // @ts-ignore
-import ModalFormSubAccountCreation from '@/views/modals/ModalFormSubAccountCreation/ModalFormSubAccountCreation.vue';
-// @ts-ignore
-import AmountDisplay from '@/components/AmountDisplay/AmountDisplay.vue';
+import MosaicAmountDisplay from '@/components/MosaicAmountDisplay/MosaicAmountDisplay.vue';
 // @ts-ignore
 import NavigationLinks from '@/components/NavigationLinks/NavigationLinks.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
+import { MosaicModel } from '@/core/database/entities/MosaicModel';
+import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
+// internal dependencies
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { AccountService } from '@/services/AccountService';
 // @ts-ignore
 import ModalBackupProfile from '@/views/modals/ModalBackupProfile/ModalBackupProfile.vue';
-import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
-import { MosaicModel } from '@/core/database/entities/MosaicModel';
+// @ts-ignore
+import ModalFormSubAccountCreation from '@/views/modals/ModalFormSubAccountCreation/ModalFormSubAccountCreation.vue';
+import { MosaicId } from 'symbol-sdk';
+import { ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -56,7 +56,6 @@ import { MosaicModel } from '@/core/database/entities/MosaicModel';
             currentProfile: 'profile/currentProfile',
             currentAccount: 'account/currentAccount',
             knownAccounts: 'account/knownAccounts',
-            networkType: 'network/networkType',
             mosaics: 'mosaic/mosaics',
             networkMosaic: 'mosaic/networkMosaic',
             networkCurrency: 'mosaic/networkCurrency',
@@ -64,18 +63,11 @@ import { MosaicModel } from '@/core/database/entities/MosaicModel';
         }),
     },
 })
-export class AccountSelectorPanelTs extends Vue {
+export class AccountSelectorPanelTs extends ValidatedComponent {
     /**
      * The network currency.
      */
     public networkCurrency: NetworkCurrencyModel;
-
-    /**
-     * Currently active networkType
-     * @see {Store.Network}
-     * @var {NetworkType}
-     */
-    public networkType: NetworkType;
 
     /**
      * Currently active profile
@@ -113,7 +105,7 @@ export class AccountSelectorPanelTs extends Vue {
      * Accounts repository
      * @var {AccountService}
      */
-    public accountService: AccountService;
+    public accountService = new AccountService();
 
     /**
      * Whether user is currently adding an account (modal)
@@ -126,21 +118,7 @@ export class AccountSelectorPanelTs extends Vue {
      */
     public isViewingExportModal: boolean = false;
 
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
-
     public isPrivateKeyProfile: boolean;
-
-    /**
-     * Hook called when the component is created
-     * @return {void}
-     */
-    public async created() {
-        this.accountService = new AccountService();
-    }
 
     /// region computed properties getter/setter
     public get balances(): Map<string, number> {

@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
+// @ts-ignore
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 // child components
 // @ts-ignore
 import { ValidationProvider } from 'vee-validate';
-// @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -31,17 +30,11 @@ import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
         FormRow,
     },
 })
-export class MessageInputTs extends Vue {
+export class MessageInputTs extends ValidatedComponent {
     @Prop({
         default: '',
     })
     value: string;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /// region computed properties getter/setter
     get plain(): string {

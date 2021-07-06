@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 import { TimeHelpers } from '@/core/utils/TimeHelpers';
-import { mapGetters } from 'vuex';
-import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -33,13 +29,8 @@ import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfi
         ErrorTooltip,
         FormRow,
     },
-    computed: {
-        ...mapGetters({
-            networkConfiguration: 'network/networkConfiguration',
-        }),
-    },
 })
-export class DurationInputTs extends Vue {
+export class DurationInputTs extends ValidatedComponent {
     @Prop({ default: '' }) value: string;
 
     /**
@@ -53,17 +44,6 @@ export class DurationInputTs extends Vue {
      * @type {string}
      */
     @Prop({ default: 'form_label_duration' }) label: string;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
-
-    /**
-     * Injected network configuration.
-     */
-    private networkConfiguration: NetworkConfigurationModel;
 
     /**
      * the toggle for the display of realativeTime

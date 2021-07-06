@@ -1,32 +1,29 @@
 // external dependencies
-import { extend } from 'vee-validate';
-import i18n from '@/language';
-import { Account, Address, NetworkType, Password, NamespaceId } from 'symbol-sdk';
-// internal dependencies
-import { ProfileService } from '@/services/ProfileService';
-import { NotificationType } from '@/core/utils/NotificationType';
 import { AppStore } from '@/app/AppStore';
 // configuration
-import { networkConfig, appConfig } from '@/config';
+import { appConfig } from '@/config';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+import i18n from '@/language';
+import { AccountService } from '@/services/AccountService';
+// internal dependencies
+import { ProfileService } from '@/services/ProfileService';
+import { Account, Address, NamespaceId, NetworkType, Password } from 'symbol-sdk';
+import { extend } from 'vee-validate';
+import { Values } from 'vue-i18n';
 import {
     AddressValidator,
     AliasValidator,
-    MaxRelativeAmountValidator,
     MaxDecimalsValidator,
     MaxMessageValidator,
-    PublicKeyValidator,
+    MaxRelativeAmountValidator,
     PositiveDecimalNumberValidator,
+    PublicKeyValidator,
     UrlValidator,
 } from './validators';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { AccountService } from '@/services/AccountService';
-import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
-import { Values } from 'vue-i18n';
 
-// TODO CustomValidationRules needs to be created when the network configuration is resolved, UI
 // needs to use the resolved CustomValidationRules
 // ATM rules are using the hardcoded file
-const currentNetwork: NetworkConfigurationModel = networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults;
 const { MIN_PASSWORD_LENGTH, DECIMAL_SEPARATOR } = appConfig.constants;
 
 export class CustomValidationRules {
@@ -186,15 +183,6 @@ export class CustomValidationRules {
             message: (_fieldName: string, values: Values) => `${i18n.t('error_incorrect_field', values)}`,
         });
 
-        extend('maxNamespaceDuration', {
-            validate: (value) => {
-                return value <= currentNetwork.maxNamespaceDuration;
-            },
-            message: (_fieldName: string, values: Values) => {
-                return `${i18n.t('error_incorrect_field', { ...values, maxValue: currentNetwork.maxNamespaceDuration })}`;
-            },
-        });
-
         extend('passwordRegex', {
             validate: (value) => {
                 return new RegExp(`(?=.*[0-9])(?=.*[a-zA-Z])(.{${MIN_PASSWORD_LENGTH},})$`).test(value);
@@ -223,3 +211,20 @@ export class CustomValidationRules {
         });
     }
 }
+// Is it used?
+// export class NetworkCustomValidationRules {
+//     /**
+//      * Registers custom validation rules that required network configuration
+//      * @static
+//      */
+//     public static register(currentNetwork: NetworkConfigurationModel): void {
+//         extend('maxNamespaceDuration', {
+//             validate: (value) => {
+//                 return value <= currentNetwork.maxNamespaceDuration;
+//             },
+//             message: (_fieldName: string, values: Values) => {
+//                 return `${i18n.t('error_incorrect_field', { ...values, maxValue: currentNetwork.maxNamespaceDuration })}`;
+//             },
+//         });
+//     }
+// }

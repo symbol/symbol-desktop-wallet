@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-
-// child components
-import { ValidationProvider, ValidationObserver } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-
-// configuration
-import { networkConfig } from '@/config';
-import { NetworkType } from 'symbol-sdk';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -40,11 +33,10 @@ import { NetworkType } from 'symbol-sdk';
     computed: {
         ...mapGetters({
             explorerUrl: 'app/explorerUrl',
-            networkType: 'network/networkType',
         }),
     },
 })
-export class ExplorerUrlSetterTs extends Vue {
+export class ExplorerUrlSetterTs extends ValidatedComponent {
     @Prop({
         default: '',
     })
@@ -56,18 +48,10 @@ export class ExplorerUrlSetterTs extends Vue {
     autoSubmit: boolean;
 
     /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
-
-    /**
      * Explorer URL
      * @var {string}
      */
     public explorerUrl: string;
-
-    public networkType: NetworkType;
 
     /**
      * Default explorer link list
@@ -75,8 +59,7 @@ export class ExplorerUrlSetterTs extends Vue {
      * @type {string[]}
      */
     get defaultExplorerLinkList(): string[] {
-        // @TODO
-        return [networkConfig[this.networkType].explorerUrl];
+        return [this.networkModel.explorerUrl].filter((f) => f);
     }
 
     /**

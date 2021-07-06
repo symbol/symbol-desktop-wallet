@@ -14,8 +14,8 @@
  *
  */
 
-import { NetworkBasedEntryModel, NetworkBasedModel } from '@/core/database/entities/NetworkBasedModel';
 import { IStorage } from '@/core/database/backends/IStorage';
+import { NetworkBasedEntryModel, NetworkBasedModel } from '@/core/database/entities/NetworkBasedModel';
 
 /**
  * A storage save the data per generation hash
@@ -26,6 +26,21 @@ export class NetworkBasedObjectStorage<E> {
      */
     public constructor(private readonly delegate: IStorage<NetworkBasedModel<E>>) {}
 
+    private getStoredData(): NetworkBasedModel<E> {
+        return this.delegate.get() || {};
+    }
+
+    /**
+     * It gets all the entries indexed by generation hash
+     * @return all the known entries.
+     */
+    public getAll(): Record<string, E> {
+        return Object.fromEntries(
+            Object.entries(this.getStoredData())
+                .filter(([k, v]) => k && v && v.data)
+                .map(([key, value]) => [key, value.data]),
+        );
+    }
     /**
      * it gets the stored value for the specific generation hash.
      *
@@ -36,7 +51,7 @@ export class NetworkBasedObjectStorage<E> {
         if (!generationHash) {
             return undefined;
         }
-        const map = this.delegate.get() || {};
+        const map = this.getStoredData();
         return (map[generationHash] && map[generationHash].data) || undefined;
     }
 
@@ -45,7 +60,7 @@ export class NetworkBasedObjectStorage<E> {
      * @return the entry if available.
      */
     public getLatest(): E | undefined {
-        const map = this.delegate.get() || {};
+        const map = this.getStoredData();
         const latest = Object.values(map).reduce(
             (prev, current) => (prev && prev.timestamp > current.timestamp ? prev : current),
             undefined,
@@ -63,7 +78,7 @@ export class NetworkBasedObjectStorage<E> {
         if (!generationHash) {
             throw Error('Generation hash must be provided!');
         }
-        const map = this.delegate.get() || {};
+        const map = this.getStoredData();
         map[generationHash] = new NetworkBasedEntryModel(generationHash, value);
         this.delegate.set(map);
     }
@@ -73,7 +88,7 @@ export class NetworkBasedObjectStorage<E> {
      * @param generationHash the generation hash.
      */
     public remove(generationHash: string): void {
-        const map = this.delegate.get() || {};
+        const map = this.getStoredData();
         delete map[generationHash];
         this.delegate.set(map);
     }

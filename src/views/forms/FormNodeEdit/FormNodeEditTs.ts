@@ -1,20 +1,20 @@
-import { Vue, Component } from 'vue-property-decorator';
-//@ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-//@ts-ignore
-import { ValidationObserver, ValidationProvider, validate } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 //@ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
+//@ts-ignore
 import PeerSelector from '@/components/PeerSelector/PeerSelector.vue';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { URLHelpers } from '@/core/utils/URLHelpers';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { mapGetters } from 'vuex';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 import { NodeModel } from '@/core/database/entities/NodeModel';
-import { NetworkType } from 'symbol-sdk';
-import { NetworkService } from '@/services/NetworkService';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+import { URLHelpers } from '@/core/utils/URLHelpers';
+import { NetworkService } from '@/services/NetworkService';
+import { NetworkType } from 'symbol-sdk';
+//@ts-ignore
+import { validate, ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -31,7 +31,7 @@ import { ProfileModel } from '@/core/database/entities/ProfileModel';
         }),
     },
 })
-export class FormNodeEditTs extends Vue {
+export class FormNodeEditTs extends ValidatedComponent {
     /**
      * Current profile
      */
@@ -45,7 +45,6 @@ export class FormNodeEditTs extends Vue {
     public $refs!: {
         observer: InstanceType<typeof ValidationObserver>;
     };
-    public validationRules = ValidationRuleset;
     public knowNodes: NodeModel[];
     public nodeDelay: number = 0;
 
@@ -91,8 +90,8 @@ export class FormNodeEditTs extends Vue {
         const networkService = new NetworkService();
         this.isGettingNodeInfo = true;
         try {
-            const { networkModel } = await networkService.getNetworkModel(url).toPromise();
-            if (!networkModel || !networkModel.nodeInfo) {
+            const networkModel = (await networkService.getNetworkModel(url).toPromise())?.networkModel;
+            if (!networkModel) {
                 return this.$store.dispatch('notification/ADD_WARNING', this.$t(NotificationType.INVALID_NODE));
             }
             if (NetworkType[this.currentProfile.networkType] !== NetworkType[networkModel.networkType]) {

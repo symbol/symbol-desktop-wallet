@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import Vue from 'vue';
+// configuration
+import { appConfig } from '@/config';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { SettingsModel } from '@/core/database/entities/SettingsModel';
 // internal dependencies
 import i18n from '@/language';
 import app from '@/main';
-import { AwaitLock } from './AwaitLock';
-// configuration
-import { appConfig } from '@/config';
-import { networkConfig } from '@/config';
-import { SettingsModel } from '@/core/database/entities/SettingsModel';
+import { NetworkService } from '@/services/NetworkService';
 import { SettingService } from '@/services/SettingService';
-import { NetworkType } from 'symbol-sdk';
-import _ from 'lodash';
+import * as _ from 'lodash';
+import Vue from 'vue';
+import { AwaitLock } from './AwaitLock';
 
 const Lock = AwaitLock.create();
 const settingService = new SettingService();
@@ -53,7 +54,7 @@ const appInfoState: AppInfoState = {
     hasControlsDisabled: false,
     controlsDisabledMessage: '',
     faucetUrl: undefined,
-    settings: settingService.getProfileSettings(ANON_PROFILE_NAME, NetworkType.TEST_NET), // TODO how to fix here? why static?
+    settings: settingService.getProfileSettings(ANON_PROFILE_NAME, new NetworkService().getDefaultNetworkModel()),
 };
 
 export default {
@@ -88,9 +89,7 @@ export default {
         toggleLoadingOverlay: (state: AppInfoState, display: boolean) => Vue.set(state, 'hasLoadingOverlay', display),
         setLoadingOverlayMessage: (state: AppInfoState, message: string) => Vue.set(state, 'loadingOverlayMessage', message),
         setLoadingDisableCloseButton: (state: AppInfoState, bool: boolean) => Vue.set(state, 'loadingDisableCloseButton', bool),
-        faucetUrl: (state: AppInfoState, faucetUrl) => {
-            Vue.set(state, 'faucetUrl', faucetUrl || networkConfig[NetworkType.TEST_NET].faucetUrl);
-        },
+        faucetUrl: (state: AppInfoState, faucetUrl) => Vue.set(state, 'faucetUrl', faucetUrl),
     },
     actions: {
         async initialize({ commit, getters }) {
@@ -137,10 +136,12 @@ export default {
                     return;
                 }
             }
-            const currentProfile = rootGetters['profile/currentProfile'];
+            const currentProfile: ProfileModel = rootGetters['profile/currentProfile'];
+            const allNetworkModels: Record<string, NetworkModel> = rootGetters['network/allNetworkModels'];
+            const networkModel = allNetworkModels[currentProfile.generationHash];
             const profileName = (currentProfile && currentProfile.profileName) || ANON_PROFILE_NAME;
-            commit('settings', settingService.changeProfileSettings(profileName, settingsModel, currentProfile.networkType));
-            commit('faucetUrl', networkConfig[currentProfile.networkType].faucetUrl);
+            commit('settings', settingService.changeProfileSettings(profileName, settingsModel, networkModel));
+            commit('faucetUrl', networkModel.faucetUrl);
         },
 
         SET_EXPLORER_URL({ dispatch }, explorerUrl: string) {
@@ -156,6 +157,5 @@ export default {
         SET_DEFAULT_ACCOUNT({ dispatch }, defaultAccount: string) {
             dispatch('SET_SETTINGS', { defaultAccount });
         },
-        /// end-region scoped actions
     },
 };

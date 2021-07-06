@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-
-// internal dependencies
-import { createValidationRuleSet } from '@/core/validation/ValidationRuleset';
-
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
-import { mapGetters } from 'vuex';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 import { MosaicModel } from '@/core/database/entities/MosaicModel';
-import { networkConfig } from '@/config';
-import { NetworkType } from 'symbol-sdk';
+// internal dependencies
+import { createValidationRuleSet } from '@/core/validation/ValidationRuleset';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop, Watch } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -35,11 +32,10 @@ import { NetworkType } from 'symbol-sdk';
     computed: {
         ...mapGetters({
             mosaics: 'mosaic/mosaics',
-            networkType: 'network/networkType',
         }),
     },
 })
-export class AmountInputTs extends Vue {
+export class AmountInputTs extends ValidatedComponent {
     @Prop({ default: '' }) value: string;
     @Prop({ default: '' }) mosaicHex: string;
 
@@ -48,22 +44,15 @@ export class AmountInputTs extends Vue {
      */
     public mosaics: MosaicModel[];
 
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules;
-
-    public networkType: NetworkType;
-
+    @Watch('mosaicHex')
     created() {
         // update validation rule to reflect correct mosaic divisibility
         const chosenMosaic = this.mosaics.find((mosaic) => this.mosaicHex === mosaic.mosaicIdHex);
-        const networkConfigurationDefaults = networkConfig[this.networkType || NetworkType.TEST_NET].networkConfigurationDefaults;
-        networkConfigurationDefaults.maxMosaicDivisibility = chosenMosaic ? chosenMosaic.divisibility : 6;
-
         // set validation rules for this field
-        this.validationRules = createValidationRuleSet(networkConfigurationDefaults);
+        this.validationRules = createValidationRuleSet({
+            ...this.networkConfiguration,
+            maxMosaicDivisibility: chosenMosaic ? chosenMosaic.divisibility : this.networkConfiguration.maxMosaicDivisibility,
+        });
     }
 
     /// region computed properties getter/setter

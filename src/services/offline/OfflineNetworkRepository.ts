@@ -1,20 +1,21 @@
-import { NetworkConfiguration, NetworkName, NetworkRepository, NetworkType, RentalFees, TransactionFees } from 'symbol-sdk';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { OfflineRentalFees } from '@/services/offline/MockModels';
 import { Observable, of } from 'rxjs';
-import { OfflineNetworkProperties, OfflineRentalFees, OfflineTransactionFees } from '@/services/offline/MockModels';
+import { NetworkConfiguration, NetworkName, NetworkRepository, NetworkType, RentalFees, TransactionFees } from 'symbol-sdk';
 
 export class OfflineNetworkRepository implements NetworkRepository {
-    constructor(private readonly networkType: NetworkType) {}
+    constructor(private readonly networkModel: NetworkModel) {}
 
     getNetworkName(): Observable<NetworkName> {
         throw new Error(`OfflineNetworkRepository: getNetworkName not implemented`);
     }
 
     getNetworkProperties(): Observable<NetworkConfiguration> {
-        return of(OfflineNetworkProperties[this.networkType]);
+        throw new Error(`OfflineNetworkRepository: getNetworkProperties not implemented`);
     }
 
     getNetworkType(): Observable<NetworkType> {
-        return of(this.networkType);
+        return of(this.networkModel.networkType);
     }
 
     getRentalFees(): Observable<RentalFees> {
@@ -22,6 +23,6 @@ export class OfflineNetworkRepository implements NetworkRepository {
     }
 
     getTransactionFees(): Observable<TransactionFees> {
-        return of(OfflineTransactionFees);
+        return of(this.networkModel.transactionFees);
     }
 }

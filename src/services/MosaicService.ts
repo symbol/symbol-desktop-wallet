@@ -14,21 +14,20 @@
  *
  */
 // external dependencies
-import _ from 'lodash';
-import { AccountInfo, Address, Currency, MosaicId, MosaicInfo, MosaicNames, NamespaceId, RepositoryFactory, UInt64 } from 'symbol-sdk';
-import { combineLatest, from, Observable, of } from 'rxjs';
-import { map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { AccountModel } from '@/core/database/entities/AccountModel';
 // internal dependencies
-import { MosaicConfigurationModel, AccountMosaicConfigurationModel } from '@/core/database/entities/MosaicConfigurationModel';
+import { AccountMosaicConfigurationModel, MosaicConfigurationModel } from '@/core/database/entities/MosaicConfigurationModel';
 import { MosaicModel } from '@/core/database/entities/MosaicModel';
+import { NetworkCurrenciesModel } from '@/core/database/entities/NetworkCurrenciesModel';
 import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
+import { MosaicConfigurationModelStorage } from '@/core/database/storage/MosaicConfigurationModelStorage';
+import { MosaicModelStorage } from '@/core/database/storage/MosaicModelStorage';
 import { ObservableHelpers } from '@/core/utils/ObservableHelpers';
 import { TimeHelpers } from '@/core/utils/TimeHelpers';
-import { NetworkCurrenciesModel } from '@/core/database/entities/NetworkCurrenciesModel';
-import { MosaicModelStorage } from '@/core/database/storage/MosaicModelStorage';
-import { NetworkCurrenciesModelStorage } from '@/core/database/storage/NetworkCurrenciesModelStorage';
-import { MosaicConfigurationModelStorage } from '@/core/database/storage/MosaicConfigurationModelStorage';
-import { AccountModel } from '@/core/database/entities/AccountModel';
+import _ from 'lodash';
+import { combineLatest, from, Observable, of } from 'rxjs';
+import { map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { AccountInfo, Address, Currency, MosaicId, MosaicInfo, MosaicNames, NamespaceId, RepositoryFactory, UInt64 } from 'symbol-sdk';
 
 // custom types
 export type ExpirationStatus = 'unlimited' | 'expired' | string | number;
@@ -69,11 +68,6 @@ export class MosaicService {
     private readonly mosaicConfigurationsStorage = MosaicConfigurationModelStorage.INSTANCE;
 
     /**
-     * Store that caches the information around the network currency.
-     */
-    private readonly networkCurrencyStorage = NetworkCurrenciesModelStorage.INSTANCE;
-
-    /**
      * This method loads and caches the mosaic information for the given accounts.
      * The returned Observable will announce the cached information first, then the rest returned
      * information (if possible).
@@ -82,6 +76,7 @@ export class MosaicService {
      * @param {string} generationHash
      * @param {NetworkCurrencyModel} networkCurrency
      * @param {AccountInfo[]} accountsInfo
+     * @param {Address} ownerAddress
      * @returns {Observable<MosaicModel[]>}
      */
     public getMosaics(
@@ -222,17 +217,15 @@ export class MosaicService {
      * and harvest currencies (cat.harvest) returned by the network configuration endpoint.
      *
      * @param {RepositoryFactory} repositoryFactory
-     * @param {generationHash} the generation hash.
-     * @returns {Observable<NetworkCurrencyModel[]>}
+     * @returns {Observable<NetworkCurrenciesModel>}
      */
-    public getNetworkCurrencies(repositoryFactory: RepositoryFactory, generationHash: string): Observable<NetworkCurrenciesModel> {
+    public getNetworkCurrencies(repositoryFactory: RepositoryFactory): Observable<NetworkCurrenciesModel> {
         return repositoryFactory.getCurrencies().pipe(
             map((networkMosaics) => {
                 const currency = this.getNetworkCurrency(networkMosaics.currency);
                 const harvest = this.getNetworkCurrency(networkMosaics.harvest);
-                return new NetworkCurrenciesModel(currency, harvest);
+                return new NetworkCurrenciesModel(currency, harvest.mosaicIdHex === currency.mosaicIdHex ? undefined : harvest);
             }),
-            tap((d) => this.networkCurrencyStorage.set(generationHash, d)),
         );
     }
 
@@ -246,14 +239,12 @@ export class MosaicService {
 
     public reset(generationHash: string) {
         this.mosaicDataStorage.remove(generationHash);
-        this.networkCurrencyStorage.remove(generationHash);
     }
 
     /**
      * Creates a network currency model given mosaic info and mosaic names
-     * @param {MosaicInfo} mosaicInfo
-     * @param {MosaicNames} mosaicName
-     * @returns {(NetworkCurrencyModel | undefined)}
+     * @param  currency
+     * @returns NetworkCurrencyModel
      */
     private getNetworkCurrency(currency: Currency): NetworkCurrencyModel {
         const mosaicId = currency.mosaicId;

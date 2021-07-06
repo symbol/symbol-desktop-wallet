@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+// @ts-ignore
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+// @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
+// @ts-ignore
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage';
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
 // internal dependencies
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { FilterHelpers } from '@/core/utils/FilterHelpers';
+import { NotificationType } from '@/core/utils/NotificationType';
+import { AccountService } from '@/services/AccountService';
+import { DerivationService } from '@/services/DerivationService';
+import { LedgerService } from '@/services/LedgerService';
 // child components
 // @ts-ignore
 import FormProfileUnlock from '@/views/forms/FormProfileUnlock/FormProfileUnlock.vue';
 // @ts-ignore
 import ModalBackupReminder from '@/views/modals/ModalBackupReminder/ModalBackupReminder.vue';
-// @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
-// @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { Crypto, NetworkType, Password, PublicAccount } from 'symbol-sdk';
-import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage';
-import { FilterHelpers } from '@/core/utils/FilterHelpers';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { DerivationService } from '@/services/DerivationService';
-import { LedgerService } from '@/services/LedgerService';
 import { MnemonicPassPhrase } from 'symbol-hd-wallets';
+import { Crypto, NetworkType, Password, PublicAccount } from 'symbol-sdk';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
-import { AccountService } from '@/services/AccountService';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -60,7 +60,7 @@ import { AccountService } from '@/services/AccountService';
         }),
     },
 })
-export class ModalFormSubAccountCreationTs extends Vue {
+export class ModalFormSubAccountCreationTs extends ValidatedComponent {
     @Prop({
         default: false,
     })
@@ -113,11 +113,6 @@ export class ModalFormSubAccountCreationTs extends Vue {
      * Derivation paths service
      */
     public paths: DerivationService;
-
-    /**
-     * Validation rules
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Whether account is currently being unlocked

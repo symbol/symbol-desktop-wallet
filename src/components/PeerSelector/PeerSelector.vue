@@ -7,7 +7,7 @@
                 <div class="current-node-info">
                     <Row>
                         <i-col span="5" class="current-node-header">{{ $t('current_network') }}:</i-col>
-                        <i-col span="19" class="current-node-value">{{ networkTypeText }}</i-col>
+                        <i-col span="19" class="current-node-value">{{ networkText }}</i-col>
                     </Row>
                     <Row>
                         <i-col span="5" class="current-node-header">{{ $t('current_endpoint') }}:</i-col>

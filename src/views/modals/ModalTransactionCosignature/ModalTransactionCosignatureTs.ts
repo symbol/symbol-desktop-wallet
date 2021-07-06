@@ -186,6 +186,8 @@ export class ModalTransactionCosignatureTs extends Vue {
 
         // Check wether the signer of the Aggregate Bonded is the NGL Finance bot.
         const networktype = this.currentProfile.networkType === NetworkType.MAIN_NET ? 'mainnet' : 'testnet';
+        // KEYS COULD BE DIFFERENT FOR DIFFERENT Testnet! What if there are private nets? Fix
+        // THIS CODE IS COPIED 3 TIMES! search for process.env.KEYS_FINANCE
         const keysFinance = process.env.KEYS_FINANCE[networktype];
         const announcerPublicKey = this.transaction.signer.publicKey;
         const isAnnouncerNGLFinance = keysFinance.find(

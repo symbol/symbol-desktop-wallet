@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { NetworkType, NodeInfo, NodeRepository, RepositoryFactory, RoleType } from 'symbol-sdk';
-import { NodeService } from '@/services/NodeService';
-import { toArray } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { instance, mock, when } from 'ts-mockito';
+import { defaultMainnetNetworkConfig } from '@/config';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NodeService } from '@/services/NodeService';
+import { of } from 'rxjs';
+import { toArray } from 'rxjs/operators';
+import { NetworkType, NodeInfo, NodeRepository, RepositoryFactory, RoleType } from 'symbol-sdk';
+import { instance, mock, when } from 'ts-mockito';
 
 const nodeService = new NodeService();
 const realUrl = 'http://api-01.us-west-1.symboldev.network:3000';
@@ -43,14 +44,14 @@ const nodeRepository = instance(mockNodeRepository);
 
 when(mockRepoFactory.createNodeRepository()).thenReturn(nodeRepository);
 when(mockRepoFactory.getEpochAdjustment()).thenReturn(of(1573430400));
-when(mockRepoFactory.getNetworkType()).thenReturn(of(NetworkType.MIJIN_TEST));
+when(mockRepoFactory.getGenerationHash()).thenReturn(of(defaultMainnetNetworkConfig.generationHash));
 const repositoryFactory = instance(mockRepoFactory);
 
 const fakeProfile: ProfileModel = {
     profileName: 'fakeName',
-    generationHash: 'fakeGenHash',
+    generationHash: defaultMainnetNetworkConfig.generationHash,
     hint: 'fakeHint',
-    networkType: NetworkType.TEST_NET,
+    networkType: defaultMainnetNetworkConfig.networkType,
     password: 'fakePassword',
     seed: 'fakeSeed',
     accounts: [],
@@ -60,7 +61,10 @@ const fakeProfile: ProfileModel = {
 
 describe('services/NodeService', () => {
     test('getNodes', async () => {
-        const peers = await nodeService.getNodes(fakeProfile, repositoryFactory, realUrl).pipe(toArray()).toPromise();
+        const peers = await nodeService
+            .getNodes(fakeProfile, defaultMainnetNetworkConfig, repositoryFactory, realUrl)
+            .pipe(toArray())
+            .toPromise();
         console.log(JSON.stringify(peers, null, 2));
     });
 });

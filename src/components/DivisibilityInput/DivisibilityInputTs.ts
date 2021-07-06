@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -32,14 +29,8 @@ import FormRow from '@/components/FormRow/FormRow.vue';
         FormRow,
     },
 })
-export class DivisibilityInputTs extends Vue {
+export class DivisibilityInputTs extends ValidatedComponent {
     @Prop({ default: '' }) value: string;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /// region computed properties getter/setter
     public get chosenValue(): string {

@@ -13,34 +13,33 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import Vue from 'vue';
-import Router from 'vue-router';
-import VueRx from 'vue-rx';
-import moment from 'vue-moment';
-import iView from 'view-design';
-import locale from 'view-design/dist/locale/en-US';
-import 'view-design/dist/styles/iview.css';
-import infiniteScroll from 'vue-infinite-scroll';
-import Toast from 'vue-toastification';
-import 'vue-toastification/dist/index.css';
-
-// internal dependencies
-import { UIBootstrapper } from '@/app/UIBootstrapper';
-import { AppStore } from '@/app/AppStore';
-import i18n from '@/language/index.ts';
-import router from '@/router/AppRouter';
-import VueNumber from 'vue-number-animation';
-import { VeeValidateSetup } from '@/core/validation/VeeValidateSetup';
 // @ts-ignore
 import App from '@/app/App.vue';
+import { AppStore } from '@/app/AppStore';
+// internal dependencies
+import { UIBootstrapper } from '@/app/UIBootstrapper';
+import { VeeValidateSetup } from '@/core/validation/VeeValidateSetup';
 import clickOutsideDirective from '@/directives/clickOutside';
-import { PluginOptions } from 'vue-toastification/dist/types/src/types';
+import i18n from '@/language/index.ts';
+import router from '@/router/AppRouter';
 // @ts-ignore
 import { library } from '@fortawesome/fontawesome-svg-core';
 // @ts-ignore
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 // @ts-ignore
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import iView from 'view-design';
+import locale from 'view-design/dist/locale/en-US';
+import 'view-design/dist/styles/iview.css';
+import Vue from 'vue';
+import infiniteScroll from 'vue-infinite-scroll';
+import moment from 'vue-moment';
+import VueNumber from 'vue-number-animation';
+import Router from 'vue-router';
+import VueRx from 'vue-rx';
+import Toast from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
+import { PluginOptions } from 'vue-toastification/dist/types/src/types';
 
 /// region UI plugins
 Vue.use(iView, { locale });

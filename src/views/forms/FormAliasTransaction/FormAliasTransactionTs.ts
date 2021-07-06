@@ -13,6 +13,28 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
+// @ts-ignore
+import AddressInput from '@/components/AddressInput/AddressInput.vue';
+// @ts-ignore
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+// @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
+// @ts-ignore
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+// @ts-ignore
+import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
+// @ts-ignore
+import MaxFeeSelector from '@/components/MaxFeeSelector/MaxFeeSelector.vue';
+// @ts-ignore
+import MosaicSelector from '@/components/MosaicSelector/MosaicSelector.vue';
+// @ts-ignore
+import NamespaceSelector from '@/components/NamespaceSelector/NamespaceSelector.vue';
+// @ts-ignore
+import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
+import { MosaicModel } from '@/core/database/entities/MosaicModel';
+import { NamespaceModel } from '@/core/database/entities/NamespaceModel';
+// @ts-ignore
+import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
 import {
     Address,
     AddressAliasTransaction,
@@ -24,35 +46,11 @@ import {
     NamespaceId,
     UInt64,
 } from 'symbol-sdk';
-import { Component, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { FormTransactionBase } from '../FormTransactionBase/FormTransactionBase';
 // child components
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
-// @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
-// @ts-ignore
-import NamespaceSelector from '@/components/NamespaceSelector/NamespaceSelector.vue';
-// @ts-ignore
-import MosaicSelector from '@/components/MosaicSelector/MosaicSelector.vue';
-// @ts-ignore
-import AddressInput from '@/components/AddressInput/AddressInput.vue';
-// @ts-ignore
-import MaxFeeSelector from '@/components/MaxFeeSelector/MaxFeeSelector.vue';
-// @ts-ignore
-import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
-// @ts-ignore
-import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
-import { MosaicModel } from '@/core/database/entities/MosaicModel';
-import { NamespaceModel } from '@/core/database/entities/NamespaceModel';
-// @ts-ignore
-import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+import { FormTransactionBase } from '../FormTransactionBase/FormTransactionBase';
 
 @Component({
     components: {
@@ -92,11 +90,6 @@ export class FormAliasTransactionTs extends FormTransactionBase {
      * @protected
      */
     protected AliasAction = AliasAction;
-
-    /**
-     * Validation rules
-     */
-    protected validationRules = ValidationRuleset;
 
     /**
      * Form items

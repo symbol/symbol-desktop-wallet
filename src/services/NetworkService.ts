@@ -14,34 +14,156 @@
  *
  */
 
-import { networkConfig } from '@/config';
+import { getNetworkConfigs } from '@/config';
 import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
-import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { NetworkModel, RestNode } from '@/core/database/entities/NetworkModel';
 import { NetworkModelStorage } from '@/core/database/storage/NetworkModelStorage';
 import { NetworkConfigurationHelpers } from '@/core/utils/NetworkConfigurationHelpers';
-import { ObservableHelpers } from '@/core/utils/ObservableHelpers';
+import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
 import { URLHelpers } from '@/core/utils/URLHelpers';
-import { combineLatest, defer, EMPTY, from, Observable } from 'rxjs';
-import { catchError, flatMap, map, tap } from 'rxjs/operators';
-import { NetworkConfiguration, NetworkType, RepositoryFactory, RepositoryFactoryHttp } from 'symbol-sdk';
+import { MosaicService } from '@/services/MosaicService';
+import { OfflineUrl } from '@/services/offline/MockModels';
 import { OfflineRepositoryFactory } from '@/services/offline/OfflineRepositoryFactory';
+import * as _ from 'lodash';
+import { combineLatest, defer, EMPTY, from, Observable, of, throwError } from 'rxjs';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
+import { NetworkConfiguration, RepositoryFactory, RepositoryFactoryHttp, RoleType } from 'symbol-sdk';
+
+export interface AddNetworkParams {
+    name?: string;
+    nodeUrl: string;
+    explorerUrl?: string;
+    faucetUrl?: string;
+}
+
+export interface NetworkModelResult {
+    networkModel: NetworkModel;
+    repositoryFactory: RepositoryFactory;
+    url: string;
+}
 
 /**
- * The service in charge of loading and caching anything related to Network from Rest.
- * The cache is done by storing the payloads in SimpleObjectStorage.
+ * The service in charge of loading Network information from the storage.
  */
 export class NetworkService {
     /**
-     * The network information local cache.
+     * The network information.
      */
     private readonly storage = NetworkModelStorage.INSTANCE;
+
+    constructor() {
+        getNetworkConfigs().forEach((staticConfig) => {
+            if (!this.storage.get(staticConfig.generationHash)) {
+                this.storage.set(staticConfig.generationHash, staticConfig);
+            }
+        });
+    }
 
     /**
      * The best default Url. It uses the stored configuration if possible.
      */
-    public getDefaultUrl(): string {
+    public getDefaultNetworkModel(): NetworkModel {
         const storedNetworkModel = this.storage.getLatest();
-        return URLHelpers.formatUrl(storedNetworkModel && storedNetworkModel.url).url;
+        if (!storedNetworkModel) {
+            throw new Error('Default Network Model could not be found!!!');
+        }
+        return storedNetworkModel;
+    }
+
+    /**
+     * The best default Url. It uses the stored configuration if possible.
+     */
+    public getAllNetworkModels(): Record<string, NetworkModel> {
+        return this.storage.getAll();
+    }
+
+    /**
+     * This method adds a new network when the user provides a url.
+     * the next available url will be used.
+     *
+     * @param params the minimal params to create a connection
+     */
+    public addNewNetwork(params: AddNetworkParams): Observable<NetworkModelResult> {
+        const url = params.nodeUrl;
+        const repositoryFactory = NetworkService.createRepositoryFactory(url);
+        return repositoryFactory.getGenerationHash().pipe(
+            mergeMap((generationHash) => {
+                // A way to update!
+                // const storedNetwork = this.storage.get(generationHash);
+                // if (storedNetwork) {
+                //     throw new Error(`The network with ${generationHash} already exist. Should you create a new Profile?`);
+                // }
+                const networkRepository = repositoryFactory.createNetworkRepository();
+                const nodeRepository = repositoryFactory.createNodeRepository();
+                const networkTypeObservable = repositoryFactory.getNetworkType();
+                const networkPropertiesObservable = networkRepository
+                    .getNetworkProperties()
+                    .pipe(map((d) => this.toNetworkConfigurationModel(d, undefined)));
+                const networkCurrenciesObservable = new MosaicService().getNetworkCurrencies(repositoryFactory);
+                const nodeInfoObservable = nodeRepository.getNodeInfo();
+                const transactionFeesObservable = repositoryFactory.createNetworkRepository().getTransactionFees();
+                const peersObservable = repositoryFactory.createNodeRepository().getNodePeers();
+                return combineLatest([
+                    networkTypeObservable,
+                    networkPropertiesObservable,
+                    nodeInfoObservable,
+                    transactionFeesObservable,
+                    peersObservable,
+                    networkCurrenciesObservable,
+                ]).pipe(
+                    map(([networkType, networkProperties, nodeInfo, transactionFees, peers, networkCurrencies]) => {
+                        const nodes: RestNode[] = [
+                            { friendlyName: nodeInfo.friendlyName, url: url },
+                            ...peers
+                                .filter((p) => p.roles.includes(RoleType.ApiNode))
+                                .map((p) => {
+                                    return {
+                                        friendlyName: p.friendlyName,
+                                        url: `http://${p.host}:3000`,
+                                    };
+                                }),
+                        ];
+                        return {
+                            networkModel: new NetworkModel(
+                                params.name || `${NetworkTypeHelper.getNetworkTypeName(networkType)} Network`,
+                                networkType,
+                                generationHash,
+                                networkProperties,
+                                _.uniqBy(nodes, (i) => i.url.toLowerCase()),
+                                transactionFees,
+                                networkCurrencies,
+                                params.explorerUrl,
+                                params.faucetUrl,
+                            ),
+                            url,
+                            repositoryFactory,
+                        };
+                    }),
+                    tap((p) => this.storage.set(generationHash, p.networkModel)),
+                );
+            }),
+        );
+    }
+
+    public getNetworkModelBasic(generationHash: string | undefined, nodeUrl: string | undefined): NetworkModel {
+        if (generationHash) {
+            const networkModel = this.storage.get(generationHash);
+            if (!networkModel) {
+                throw new Error(`There is not stored Network Model with hash ${generationHash}`);
+            }
+            return networkModel;
+        }
+        if (nodeUrl) {
+            const networkModel = Object.values(this.storage.getAll()).find((model) =>
+                model.nodes.find((n) => n.url.toLowerCase() == nodeUrl.toLowerCase()),
+            );
+            if (!networkModel) {
+                throw new Error(`There is not stored Network Model with url ${nodeUrl}`);
+            }
+            return networkModel;
+        }
+
+        throw new Error(`Generation hash or nodeUrl must be provided!`);
     }
 
     /**
@@ -49,52 +171,55 @@ export class NetworkService {
      * the next available url will be used.
      *
      * @param nodeUrl
-     * @param defaultNetworkType
+     * @param defaultGenerationHash the generation hash if it's known.
      * @param isOffline
      */
     public getNetworkModel(
         nodeUrl: string,
-        defaultNetworkType: NetworkType = NetworkType.TEST_NET,
-        isOffline = false,
-    ): Observable<{
-        networkModel: NetworkModel;
-        repositoryFactory: RepositoryFactory;
-    }> {
-        return from(this.createRepositoryFactory(nodeUrl, isOffline, defaultNetworkType)).pipe(
-            flatMap(({ url, repositoryFactory }) => {
+        defaultGenerationHash: string | undefined = undefined,
+        isOffline: boolean = false,
+    ): Observable<NetworkModelResult> {
+        if (isOffline) {
+            if (!defaultGenerationHash) {
+                throw new Error('defaultGenerationHash must be provided when requesting offline model;');
+            }
+            const storedNetwork = this.storage.get(defaultGenerationHash);
+            if (!storedNetwork) {
+                throw new Error(`There is not stored Network Model with the name ${defaultGenerationHash} `);
+            }
+            return of({
+                networkModel: storedNetwork,
+                repositoryFactory: new OfflineRepositoryFactory(storedNetwork),
+                url: OfflineUrl,
+            });
+        }
+        return from(this.createRepositoryFactory(nodeUrl)).pipe(
+            mergeMap(({ url, repositoryFactory }) => {
                 return repositoryFactory.getGenerationHash().pipe(
-                    flatMap((generationHash) => {
-                        const networkRepository = repositoryFactory.createNetworkRepository();
-                        const nodeRepository = repositoryFactory.createNodeRepository();
-                        const networkTypeObservable = repositoryFactory
-                            .getNetworkType()
-                            .pipe(ObservableHelpers.defaultLast(defaultNetworkType));
+                    mergeMap((generationHash) => {
+                        const storedNetwork = this.storage.get(generationHash);
+                        if (!storedNetwork) {
+                            return throwError(new Error(`${generationHash} is not a known network!`));
+                        }
+                        // NOTE, the original node list is not update at network store because the user already has its own store for that.
+                        // See NodeService. Note, I think how nodes are retrieved can be simplified a lot...
+                        const networkTypeObservable = repositoryFactory.getNetworkType();
                         const generationHashObservable = repositoryFactory.getGenerationHash();
-
-                        const networkPropertiesObservable = networkRepository
-                            .getNetworkProperties()
-                            .pipe(map((d) => this.toNetworkConfigurationModel(d, defaultNetworkType)));
-                        const nodeInfoObservable = nodeRepository.getNodeInfo();
-
                         const transactionFeesObservable = repositoryFactory.createNetworkRepository().getTransactionFees();
-
-                        return combineLatest([
-                            networkTypeObservable,
-                            generationHashObservable,
-                            networkPropertiesObservable,
-                            nodeInfoObservable,
-                            transactionFeesObservable,
-                        ]).pipe(
-                            map(([networkType, generationHash, networkProperties, nodeInfo, transactionFees]) => {
+                        return combineLatest([networkTypeObservable, generationHashObservable, transactionFeesObservable]).pipe(
+                            map(([networkType, generationHash, transactionFees]) => {
+                                if (networkType !== storedNetwork.networkType) {
+                                    throw new Error(`Invalid networkType from ${url}`);
+                                }
+                                if (generationHash !== storedNetwork.generationHash) {
+                                    throw new Error(`Invalid generationHash from ${url}`);
+                                }
                                 return {
-                                    networkModel: new NetworkModel(
-                                        url,
-                                        networkType,
-                                        generationHash,
-                                        networkProperties,
+                                    networkModel: {
+                                        ...storedNetwork,
                                         transactionFees,
-                                        nodeInfo,
-                                    ),
+                                    },
+                                    url,
                                     repositoryFactory,
                                 };
                             }),
@@ -106,13 +231,9 @@ export class NetworkService {
         );
     }
 
-    private createRepositoryFactory(
-        url: string,
-        isOffline = false,
-        networkType = NetworkType.TEST_NET,
-    ): Observable<{ url: string; repositoryFactory: RepositoryFactory }> {
+    private createRepositoryFactory(url: string): Observable<{ url: string; repositoryFactory: RepositoryFactory }> {
         // console.log(`Testing ${url}`);
-        const repositoryFactory = NetworkService.createRepositoryFactory(url, isOffline, networkType);
+        const repositoryFactory = NetworkService.createRepositoryFactory(url);
         return defer(() => {
             return repositoryFactory.getGenerationHash();
         }).pipe(
@@ -127,45 +248,42 @@ export class NetworkService {
         );
     }
 
-    private toNetworkConfigurationModel(dto: NetworkConfiguration, networkType: NetworkType): NetworkConfigurationModel {
-        const fileDefaults: NetworkConfigurationModel = networkConfig[networkType].networkConfigurationDefaults;
+    private toNetworkConfigurationModel(
+        dto: NetworkConfiguration,
+        defaultNetworkModel: NetworkConfigurationModel | undefined,
+    ): NetworkConfigurationModel {
+        const helper = new NetworkConfigurationHelpers(defaultNetworkModel);
         const fromDto: NetworkConfigurationModel = {
-            epochAdjustment: NetworkConfigurationHelpers.epochAdjustment(dto),
-            maxMosaicDivisibility: NetworkConfigurationHelpers.maxMosaicDivisibility(dto),
-            namespaceGracePeriodDuration: NetworkConfigurationHelpers.namespaceGracePeriodDuration(dto),
-            lockedFundsPerAggregate: NetworkConfigurationHelpers.lockedFundsPerAggregate(dto),
-            maxCosignatoriesPerAccount: NetworkConfigurationHelpers.maxCosignatoriesPerAccount(dto),
-            blockGenerationTargetTime: NetworkConfigurationHelpers.blockGenerationTargetTime(dto),
-            maxNamespaceDepth: NetworkConfigurationHelpers.maxNamespaceDepth(dto),
-            maxMosaicDuration: NetworkConfigurationHelpers.maxMosaicDuration(dto),
-            minNamespaceDuration: NetworkConfigurationHelpers.minNamespaceDuration(dto),
-            maxNamespaceDuration: NetworkConfigurationHelpers.maxNamespaceDuration(dto),
-            maxTransactionsPerAggregate: NetworkConfigurationHelpers.maxTransactionsPerAggregate(dto),
-            maxCosignedAccountsPerAccount: NetworkConfigurationHelpers.maxCosignedAccountsPerAccount(dto),
-            maxMessageSize: NetworkConfigurationHelpers.maxMessageSize(dto),
-            maxMosaicAtomicUnits: NetworkConfigurationHelpers.maxMosaicAtomicUnits(dto),
-            currencyMosaicId: NetworkConfigurationHelpers.currencyMosaicId(dto),
-            harvestingMosaicId: NetworkConfigurationHelpers.harvestingMosaicId(dto),
-            defaultDynamicFeeMultiplier: NetworkConfigurationHelpers.defaultDynamicFeeMultiplier(dto),
-            totalChainImportance: NetworkConfigurationHelpers.totalChainImportance(dto),
+            epochAdjustment: helper.epochAdjustment(dto),
+            maxMosaicDivisibility: helper.maxMosaicDivisibility(dto),
+            namespaceGracePeriodDuration: helper.namespaceGracePeriodDuration(dto),
+            lockedFundsPerAggregate: helper.lockedFundsPerAggregate(dto),
+            maxCosignatoriesPerAccount: helper.maxCosignatoriesPerAccount(dto),
+            blockGenerationTargetTime: helper.blockGenerationTargetTime(dto),
+            maxNamespaceDepth: helper.maxNamespaceDepth(dto),
+            maxMosaicDuration: helper.maxMosaicDuration(dto),
+            minNamespaceDuration: helper.minNamespaceDuration(dto),
+            maxNamespaceDuration: helper.maxNamespaceDuration(dto),
+            maxTransactionsPerAggregate: helper.maxTransactionsPerAggregate(dto),
+            maxCosignedAccountsPerAccount: helper.maxCosignedAccountsPerAccount(dto),
+            maxMessageSize: helper.maxMessageSize(dto),
+            maxMosaicAtomicUnits: helper.maxMosaicAtomicUnits(dto),
+            currencyMosaicId: helper.currencyMosaicId(dto),
+            harvestingMosaicId: helper.harvestingMosaicId(dto),
+            defaultDynamicFeeMultiplier: helper.defaultDynamicFeeMultiplier(dto),
+            totalChainImportance: helper.totalChainImportance(dto),
         };
-        return { ...fileDefaults, ...fromDto };
-    }
-
-    public reset(generationHash: string) {
-        this.storage.remove(generationHash);
+        return { ...defaultNetworkModel, ...fromDto };
     }
 
     /**
      * It creates the RepositoryFactory used to build the http repository/clients and listeners.
      * @param url the url.
      */
-    public static createRepositoryFactory(url: string, isOffline: boolean = false, networkType = NetworkType.TEST_NET): RepositoryFactory {
-        return isOffline
-            ? new OfflineRepositoryFactory(networkType)
-            : new RepositoryFactoryHttp(url, {
-                  websocketUrl: URLHelpers.httpToWsUrl(url) + '/ws',
-                  websocketInjected: WebSocket,
-              });
+    public static createRepositoryFactory(url: string): RepositoryFactory {
+        return new RepositoryFactoryHttp(url, {
+            websocketUrl: URLHelpers.httpToWsUrl(url) + '/ws',
+            websocketInjected: WebSocket,
+        });
     }
 }

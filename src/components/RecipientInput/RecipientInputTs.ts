@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { NetworkType } from 'symbol-sdk';
-
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-
-// child components
-import { ValidationProvider } from 'vee-validate';
+// @ts-ignore
+import ContactSelector from '@/components/ContactSelector/ContactSelector.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ContactSelector from '@/components/ContactSelector/ContactSelector.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 import { AddressBook } from 'symbol-address-book/AddressBook';
+import { NetworkType } from 'symbol-sdk';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -44,7 +41,7 @@ import { AddressBook } from 'symbol-address-book/AddressBook';
         }),
     },
 })
-export class RecipientInputTs extends Vue {
+export class RecipientInputTs extends ValidatedComponent {
     @Prop({
         default: null,
     })
@@ -63,12 +60,6 @@ export class RecipientInputTs extends Vue {
      * @var {AddressBook}
      */
     public addressBook: AddressBook;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /// region computed properties getter/setter
     public get rawValue(): string {

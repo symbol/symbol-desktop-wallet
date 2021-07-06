@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import Vue from 'vue';
+import { MetadataModel } from '@/core/database/entities/MetadataModel';
+import { MosaicConfigurationModel } from '@/core/database/entities/MosaicConfigurationModel';
+import { MosaicModel } from '@/core/database/entities/MosaicModel';
+import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { MetadataService } from '@/services/MetadataService';
+import { MosaicService } from '@/services/MosaicService';
 import { AccountInfo, Address, MosaicId, RepositoryFactory } from 'symbol-sdk';
+import Vue from 'vue';
 // internal dependencies
 import { AwaitLock } from './AwaitLock';
-import { MosaicService } from '@/services/MosaicService';
-import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
-import { MosaicModel } from '@/core/database/entities/MosaicModel';
-import { MosaicConfigurationModel } from '@/core/database/entities/MosaicConfigurationModel';
-import { first, tap } from 'rxjs/operators';
-import { MetadataModel } from '@/core/database/entities/MetadataModel';
-import { MetadataService } from '@/services/MetadataService';
 
 const Lock = AwaitLock.create();
 
@@ -158,19 +158,9 @@ export default {
             await Lock.uninitialize(callback, { getters });
         },
 
-        async LOAD_NETWORK_CURRENCIES({ commit, rootGetters }) {
-            const mosaicService = new MosaicService();
-            const repositoryFactory: RepositoryFactory = rootGetters['network/repositoryFactory'];
-            const generationHash: string = rootGetters['network/generationHash'];
-            await mosaicService
-                .getNetworkCurrencies(repositoryFactory, generationHash)
-                .pipe(
-                    tap((networkCurrencies) => {
-                        commit('networkCurrency', networkCurrencies.networkCurrency);
-                    }),
-                    first(),
-                )
-                .toPromise();
+        LOAD_NETWORK_CURRENCIES({ commit, rootGetters }) {
+            const networkModel: NetworkModel = rootGetters['network/networkModel'];
+            commit('networkCurrency', networkModel.networkCurrencies.networkCurrency);
         },
 
         LOAD_MOSAICS({ commit, rootGetters }) {

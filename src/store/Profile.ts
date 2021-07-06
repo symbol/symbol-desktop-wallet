@@ -14,6 +14,7 @@
  *
  */
 import { AccountModel } from '@/core/database/entities/AccountModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
 import { ProfileService } from '@/services/ProfileService';
 import { SettingService } from '@/services/SettingService';
@@ -109,15 +110,18 @@ export default {
             }
             await dispatch('RESET_STATE');
         },
-        async SET_CURRENT_PROFILE({ commit, dispatch }, currentProfile: ProfileModel) {
+        async SET_CURRENT_PROFILE({ commit, dispatch, rootGetters }, currentProfile: ProfileModel) {
             // update state
             commit('currentProfile', currentProfile);
             commit('setAuthenticated', true);
 
             dispatch('diagnostic/ADD_DEBUG', 'Changing current profile to ' + currentProfile.profileName, { root: true });
+            const generationHash = currentProfile.generationHash;
+            const allNetworkModels: Record<string, NetworkModel> = rootGetters['network/allNetworkModels'];
+            const settings = new SettingService().getProfileSettings(currentProfile.profileName, allNetworkModels[generationHash]);
 
-            const settings = new SettingService().getProfileSettings(currentProfile.profileName, currentProfile.networkType);
             dispatch('app/SET_SETTINGS', settings, { root: true });
+
             dispatch('addressBook/LOAD_ADDRESS_BOOK', null, { root: true });
 
             dispatch('network/SET_NETWORK_TYPE', currentProfile.networkType, { root: true });

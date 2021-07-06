@@ -35,6 +35,8 @@ export class VeeValidateSetup {
     private registerValidationRules() {
         StandardValidationRules.register();
         CustomValidationRules.register();
+        // Hardcoded to default file! IS THIS USED?
+        // NetworkCustomValidationRules.register(getNetworkConfig().networkConfiguration);
     }
 
     /**

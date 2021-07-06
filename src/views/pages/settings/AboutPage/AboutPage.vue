@@ -35,10 +35,7 @@
                     {{ $t('about_network_type') }}
                 </div>
                 <div class="value">
-                    <span v-if="isNetworkType(types.MAIN_NET)">MAINNET</span>
-                    <span v-else-if="isNetworkType(types.TEST_NET)">TESTNET</span>
-                    <span v-else-if="isNetworkType(types.MIJIN)">MIJIN</span>
-                    <span v-else-if="isNetworkType(types.MIJIN_TEST)">MIJIN_TEST</span>
+                    <span>{{ networkTypeName }}</span>
                 </div>
             </div>
 
@@ -98,19 +95,18 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { NetworkType } from 'symbol-sdk';
 // child components
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
 import FormLabel from '@/components/FormLabel/FormLabel.vue';
 // configuration
 import { appConfig } from '@/config';
 import { feesConfig } from '@/config';
-import { networkConfig } from '@/config';
 import packageConfig from '@/../package.json';
 import packageLockConfig from '@/../package-lock.json';
 import { mapGetters } from 'vuex';
 import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { URLInfo } from '@/core/utils/URLInfo';
+import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
 
 @Component({
     components: {
@@ -120,7 +116,6 @@ import { URLInfo } from '@/core/utils/URLInfo';
     computed: {
         ...mapGetters({
             networkModel: 'network/networkModel',
-            networkType: 'network/networkType',
             currentPeer: 'network/currentPeer',
         }),
     },
@@ -135,13 +130,10 @@ export default class AboutPage extends Vue {
         packageLock: packageLockConfig,
         app: appConfig,
         fees: feesConfig,
-        network: networkConfig,
     };
-    public types = NetworkType;
-    public networkType: NetworkType;
 
-    public isNetworkType(type): boolean {
-        return networkConfig[this.networkType].defaultNetworkType === type;
+    public get networkTypeName(): string {
+        return NetworkTypeHelper.getNetworkTypeName(this.networkModel.networkType);
     }
 
     public get generationHash(): string {

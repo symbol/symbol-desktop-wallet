@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { MosaicId, MultisigAccountInfo, NetworkType, PublicAccount, Transaction, TransactionFees, Address, Deadline } from 'symbol-sdk';
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 // internal dependencies
 import { AccountModel } from '@/core/database/entities/AccountModel';
-import { ValidationObserver } from 'vee-validate';
-import { Signer } from '@/store/Account';
 import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
 import { TransactionCommand, TransactionCommandMode } from '@/services/TransactionCommand';
-import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
+import { Signer } from '@/store/Account';
+import { Address, Deadline, MosaicId, MultisigAccountInfo, NetworkType, PublicAccount, Transaction, TransactionFees } from 'symbol-sdk';
+import { ValidationObserver } from 'vee-validate';
+import { Component, Watch } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     computed: {
@@ -41,13 +41,12 @@ import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfi
             networkMosaic: 'mosaic/networkMosaic',
             networkCurrency: 'mosaic/networkCurrency',
             signers: 'account/signers',
-            networkConfiguration: 'network/networkConfiguration',
             transactionFees: 'network/transactionFees',
             isOfflineMode: 'network/isOfflineMode',
         }),
     },
 })
-export class FormTransactionBase extends Vue {
+export class FormTransactionBase extends ValidatedComponent {
     /// region store getters
     /**
      * Network generation hash
@@ -129,8 +128,6 @@ export class FormTransactionBase extends Vue {
     public signers: Signer[];
 
     public networkCurrency: NetworkCurrencyModel;
-
-    public networkConfiguration: NetworkConfigurationModel;
 
     public command: TransactionCommand;
 

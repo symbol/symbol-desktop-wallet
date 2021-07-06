@@ -14,9 +14,13 @@
  *
  */
 
-import { NetworkType, NodeInfo, TransactionFees } from 'symbol-sdk';
 import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
+import { NetworkCurrenciesModel } from '@/core/database/entities/NetworkCurrenciesModel';
+import { NetworkType, TransactionFees } from 'symbol-sdk';
 
+export class RestNode {
+    constructor(public readonly friendlyName: string, public readonly url: string) {}
+}
 /**
  * Stored POJO that holds network information.
  *
@@ -27,11 +31,14 @@ import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfi
  */
 export class NetworkModel {
     constructor(
-        public readonly url: string,
+        public readonly name: string,
         public readonly networkType: NetworkType,
         public readonly generationHash: string,
         public readonly networkConfiguration: NetworkConfigurationModel,
+        public readonly nodes: RestNode[],
         public readonly transactionFees: TransactionFees,
-        public readonly nodeInfo: NodeInfo,
+        public readonly networkCurrencies: NetworkCurrenciesModel,
+        public readonly explorerUrl: string | undefined,
+        public readonly faucetUrl: string | undefined,
     ) {}
 }

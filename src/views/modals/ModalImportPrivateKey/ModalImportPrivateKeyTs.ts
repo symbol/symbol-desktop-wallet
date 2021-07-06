@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
 // @ts-ignore
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
 // @ts-ignore
 import { PrivateKeyValidator } from '@/core/validation/validators';
 import { Account } from 'symbol-sdk';
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
 @Component({
     components: {
         ErrorTooltip,
@@ -41,7 +41,7 @@ import { ProfileModel } from '@/core/database/entities/ProfileModel';
         }),
     },
 })
-export default class ModalImportPrivateKeyTs extends Vue {
+export default class ModalImportPrivateKeyTs extends ValidatedComponent {
     @Prop({
         default: false,
     })
@@ -55,7 +55,6 @@ export default class ModalImportPrivateKeyTs extends Vue {
      * Validation rules
      * @var {ValidationRuleset}
      */
-    public validationRules = ValidationRuleset;
     private privateKey: string = '';
     private type: string = '';
     private currentProfile: ProfileModel;

@@ -14,24 +14,24 @@
  *
  */
 // external dependencies
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+// @ts-ignore
+import AccountActions from '@/components/AccountActions/AccountActions.vue';
+// @ts-ignore
+import AccountAddressDisplay from '@/components/AccountAddressDisplay/AccountAddressDisplay.vue';
 // child components
 // @ts-ignore
 import AccountNameDisplay from '@/components/AccountNameDisplay/AccountNameDisplay.vue';
 // @ts-ignore
 import AddressQR from '@/components/AddressQR/AddressQR.vue';
 // @ts-ignore
-import AccountAddressDisplay from '@/components/AccountAddressDisplay/AccountAddressDisplay.vue';
-// @ts-ignore
-import AccountActions from '@/components/AccountActions/AccountActions.vue';
-// @ts-ignore
 import FormInputEditable from '@/components/FormInputEditable/FormInputEditable.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 // @ts-ignore
 import ModalConfirm from '@/views/modals/ModalConfirm/ModalConfirm.vue';
 import { AddressBook, IContact } from 'symbol-address-book';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
 import { Address } from 'symbol-sdk';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -52,17 +52,12 @@ import { Address } from 'symbol-sdk';
         },
     },
 })
-export class ContactDetailPanelTs extends Vue {
+export class ContactDetailPanelTs extends ValidatedComponent {
     public addressBook: AddressBook;
 
     public selectedContact: IContact;
 
     public showDeleteConfirmModal: boolean = false;
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     public saveProperty(propName: string) {
         return (newVal: string) => {

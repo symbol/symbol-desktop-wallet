@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { NetworkType, Password } from 'symbol-sdk';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { ProfileService } from '@/services/ProfileService';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
+// @ts-ignore
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
 // @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
+import PasswordInput from '@/components/PasswordInput/PasswordInput.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
 import { FilterHelpers } from '@/core/utils/FilterHelpers';
 import { AccountService } from '@/services/AccountService';
-import { networkConfig } from '@/config';
-// @ts-ignore
-import PasswordInput from '@/components/PasswordInput/PasswordInput.vue';
+import { ProfileService } from '@/services/ProfileService';
+import { Password } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 /// end-region custom types
 
 @Component({
@@ -50,10 +48,11 @@ import PasswordInput from '@/components/PasswordInput/PasswordInput.vue';
             generationHash: 'network/generationHash',
             currentProfile: 'profile/currentProfile',
             isConnected: 'network/isConnected',
+            allNetworkModels: 'network/allNetworkModels',
         }),
     },
 })
-export class FormProfileCreationTs extends Vue {
+export class FormProfileCreationTs extends ValidatedComponent {
     /**
      * Currently active profile
      * @see {Store.Profile}
@@ -70,9 +69,11 @@ export class FormProfileCreationTs extends Vue {
 
     isLedger = false;
 
+    public allNetworkModels: Record<string, NetworkModel>;
+
     created() {
         this.profileService = new ProfileService();
-        this.formItems.networkType = NetworkType.MAIN_NET;
+        this.formItems.generationHash = Object.keys(this.allNetworkModels)[0];
         const { isLedger } = this.$route.meta;
         this.isLedger = isLedger;
     }
@@ -85,18 +86,6 @@ export class FormProfileCreationTs extends Vue {
     public generationHash: string;
 
     /**
-     * Ledger Accounts repository
-     * @var {ProfileService}
-     */
-    public ledgerAccountService = new AccountService();
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
-
-    /**
      * Form fields
      * @var {Object}
      */
@@ -105,14 +94,8 @@ export class FormProfileCreationTs extends Vue {
         password: '',
         passwordAgain: '',
         hint: '',
-        networkType: this.$store.getters['network/networkType'],
+        generationHash: '',
     };
-
-    /**
-     * Network types
-     * @var {NetworkNodeEntry[]}
-     */
-    public networkTypeList = NetworkTypeHelper.networkTypeList;
 
     /**
      * Type the ValidationObserver refs
@@ -126,14 +109,14 @@ export class FormProfileCreationTs extends Vue {
 
     /// region computed properties getter/setter
     get nextPage() {
-        this.connect(this.formItems.networkType);
+        this.connect(this.formItems.generationHash);
         return this.$route.meta.nextPage;
     }
 
     /// end-region computed properties getter/setter
 
-    public connect(newNetworkType) {
-        this.$store.dispatch('network/CONNECT', { networkType: newNetworkType });
+    public connect(newGenerationHash: string) {
+        this.$store.dispatch('network/CONNECT', { generationHash: newGenerationHash });
     }
 
     /**
@@ -203,15 +186,15 @@ export class FormProfileCreationTs extends Vue {
     private persistAccountAndContinue() {
         // -  password stored as hash (never plain.)
         const passwordHash = ProfileService.getPasswordHash(new Password(this.formItems.password));
-        const genHash = networkConfig[this.formItems.networkType].networkConfigurationDefaults.generationHash || this.generationHash;
+        const networkType = this.allNetworkModels[this.formItems.generationHash].networkType;
         const profile: ProfileModel = {
             profileName: this.formItems.profileName,
             accounts: [],
             seed: '',
             password: passwordHash,
             hint: this.formItems.hint,
-            networkType: this.formItems.networkType,
-            generationHash: genHash,
+            networkType: networkType,
+            generationHash: this.formItems.generationHash,
             termsAndConditionsApproved: false,
             selectedNodeUrlToConnect: '',
         };
@@ -222,10 +205,11 @@ export class FormProfileCreationTs extends Vue {
         this.$store.dispatch('profile/SET_CURRENT_PROFILE', profile);
         this.$store.dispatch('temporary/SET_PASSWORD', this.formItems.password);
         if (this.isLedger) {
+            const networkType = this.allNetworkModels[this.formItems.generationHash].networkType;
             // try for make sure device was connected for next step require it
             const accountService = new AccountService();
             accountService
-                .getLedgerAccounts(this.formItems.networkType, 1)
+                .getLedgerAccounts(networkType, 1)
                 .then(() => {
                     // flush and continue
                     this.$router.push({ name: this.nextPage });

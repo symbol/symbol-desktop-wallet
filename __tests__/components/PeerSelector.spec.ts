@@ -1,11 +1,10 @@
 //@ts-ignore
 import PeerSelector from '@/components/PeerSelector/PeerSelector.vue';
-import { createLocalVue, ThisTypedShallowMountOptions, mount } from '@vue/test-utils';
-import Vuex from 'vuex';
 import i18n from '@/language';
-import VueI18n from 'vue-i18n';
-import { NetworkService } from '@/services/NetworkService';
+import { createLocalVue, mount, ThisTypedShallowMountOptions } from '@vue/test-utils';
 import { NetworkType } from 'symbol-sdk';
+import VueI18n from 'vue-i18n';
+import Vuex from 'vuex';
 // configuration
 let wrapper;
 let vm;
@@ -32,9 +31,7 @@ beforeEach(() => {
                 return { url: 'www.google.com', friendlyName: 'google' };
             },
             isConnected: () => true,
-            networkType: () => null,
-            repositoryFactory: () => NetworkService.createRepositoryFactory(''),
-            generationHash: () => 123,
+            generationHash: () => undefined,
             knowNodes: () => [
                 { url: 'http://api-01.us-west-1.0941-v1.symboldev.network:3000', friendlyName: '614084b4', isDefault: true },
                 {
@@ -97,12 +94,12 @@ beforeEach(() => {
     vm = wrapper.vm;
 });
 describe('PeerSelector should', () => {
-    it("correctly get value of 'networkTypeText' ", () => {
+    it("correctly get value of 'networkText' ", () => {
         expect(vm.isConnected).toBeTruthy();
-        expect(vm.networkType).toBeFalsy();
-        expect(vm.networkTypeText).toBe('Loading...');
+        expect(vm.generationHash).toBeFalsy();
+        expect(vm.networkText).toBe('Loading...');
     });
-    it("correctly get value of 'peersList'", () => {
+    it('c' + "orrectly get value of 'peersList'", () => {
         expect(vm.peersList.length).toBe(8);
     });
 });

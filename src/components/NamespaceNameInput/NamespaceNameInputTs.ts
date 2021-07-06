@@ -14,17 +14,15 @@
  *
  */
 // external dependencies
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { NamespaceRegistrationType, NetworkType } from 'symbol-sdk';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { NamespaceRegistrationType } from 'symbol-sdk';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -32,31 +30,14 @@ import FormRow from '@/components/FormRow/FormRow.vue';
         ErrorTooltip,
         FormRow,
     },
-    computed: {
-        ...mapGetters({
-            networkType: 'network/networkType',
-        }),
-    },
 })
-export class NamespaceNameInputTs extends Vue {
+export class NamespaceNameInputTs extends ValidatedComponent {
     @Prop({ default: null }) value: string;
 
     @Prop({ default: NamespaceRegistrationType.RootNamespace })
     namespaceRegistrationType: NamespaceRegistrationType;
 
     @Prop({ default: true }) isNeedAutoFocus: boolean;
-
-    /**
-     * Current network type
-     * @var {NetworkType}
-     */
-    public networkType: NetworkType;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /// region computed properties getter/setter
     public get chosenValue(): string {

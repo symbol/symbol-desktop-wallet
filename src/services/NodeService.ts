@@ -14,15 +14,15 @@
  *
  */
 
-import { NetworkType, NodeInfo, RepositoryFactory } from 'symbol-sdk';
-import { Observable } from 'rxjs';
-import { ObservableHelpers } from '@/core/utils/ObservableHelpers';
-import { map, tap } from 'rxjs/operators';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { NodeModel } from '@/core/database/entities/NodeModel';
-import * as _ from 'lodash';
-import { networkConfig } from '@/config';
-import { NodeModelStorage } from '@/core/database/storage/NodeModelStorage';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NodeModelStorage } from '@/core/database/storage/NodeModelStorage';
+import { ObservableHelpers } from '@/core/utils/ObservableHelpers';
+import * as _ from 'lodash';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { NodeInfo, RepositoryFactory } from 'symbol-sdk';
 
 /**
  * The service in charge of loading and caching anything related to Node and Peers from Rest.
@@ -31,55 +31,63 @@ import { ProfileModel } from '@/core/database/entities/ProfileModel';
 export class NodeService {
     /**
      * The peer information local cache.
+     *
+     * NodeModelStorage is broken. It stores flat and it only has a network type reference.
+     * It cannot handles nodes with same network type but different network!
+     *
+     * https://github.com/nemgrouplimited/symbol-desktop-wallet/issues/1406
      */
     private readonly storage = NodeModelStorage.INSTANCE;
 
-    public getKnowNodesOnly(profile: ProfileModel): NodeModel[] {
-        return _.uniqBy(this.loadNodes(profile).concat(this.loadStaticNodes(profile.networkType)), 'url').filter(
+    public getKnowNodesOnly(profile: ProfileModel, networkModel: NetworkModel): NodeModel[] {
+        if (profile.generationHash != networkModel.generationHash) {
+            throw new Error('Invalid generation hash in profile and network objects!');
+        }
+        if (profile.networkType != networkModel.networkType) {
+            throw new Error('Invalid network type in profile and network objects!');
+        }
+        return _.uniqBy(this.loadNodes(profile).concat(this.loadStaticNodes(networkModel)), 'url').filter(
             (n) => n.networkType === profile.networkType,
         );
     }
 
-    public getNodes(profile: ProfileModel, repositoryFactory: RepositoryFactory, repositoryFactoryUrl: string): Observable<NodeModel[]> {
-        const storedNodes = this.getKnowNodesOnly(profile);
+    public getNodes(
+        profile: ProfileModel,
+        networkModel: NetworkModel,
+        repositoryFactory: RepositoryFactory,
+        repositoryFactoryUrl: string,
+    ): Observable<NodeModel[]> {
+        const storedNodes = this.getKnowNodesOnly(profile, networkModel);
         const nodeRepository = repositoryFactory.createNodeRepository();
-
         return nodeRepository.getNodeInfo().pipe(
             map((dto: NodeInfo) =>
-                this.createNodeModel(
-                    repositoryFactoryUrl,
-                    profile.networkType,
-                    dto.friendlyName,
-                    undefined,
-                    dto.publicKey,
-                    dto.nodePublicKey,
-                ),
+                this.createNodeModel(repositoryFactoryUrl, dto.friendlyName, undefined, networkModel, dto.publicKey, dto.nodePublicKey),
             ),
-            ObservableHelpers.defaultLast(this.createNodeModel(repositoryFactoryUrl, profile.networkType)),
-            map((currentNode) => _.uniqBy([currentNode, ...storedNodes], 'url')),
+            ObservableHelpers.defaultLast(this.createNodeModel(repositoryFactoryUrl, undefined, undefined, networkModel)),
+            map((currentNode) => _.uniqBy([currentNode, ...storedNodes], (p) => p.url.toLowerCase())),
             tap((p) => this.saveNodes(profile, p)),
         );
     }
 
-    private loadStaticNodes(networkType: NetworkType): NodeModel[] {
-        return networkConfig[networkType].nodes.map((n) => {
-            return this.createNodeModel(n.url, networkType, n.friendlyName, true);
+    private loadStaticNodes(networkModel: NetworkModel): NodeModel[] {
+        return networkModel.nodes.map((n) => {
+            return this.createNodeModel(n.url, n.friendlyName, true, networkModel);
         });
     }
 
     private createNodeModel(
         url: string,
-        networkType: NetworkType,
         friendlyName: string | undefined = undefined,
         isDefault: boolean | undefined = undefined,
+        networkModel: NetworkModel,
         publicKey?: string,
         nodePublicKey?: string,
     ): NodeModel {
         return new NodeModel(
             url,
             friendlyName || '',
-            isDefault || !!networkConfig[networkType].nodes.find((n) => n.url === url),
-            networkType,
+            isDefault || !!networkModel.nodes.find((n) => n.url === url),
+            networkModel.networkType,
             publicKey,
             nodePublicKey,
         );

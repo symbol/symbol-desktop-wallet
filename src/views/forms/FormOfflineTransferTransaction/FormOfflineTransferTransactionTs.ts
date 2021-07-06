@@ -13,41 +13,40 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Address, NetworkType, SignedTransaction } from 'symbol-sdk';
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
+// @ts-ignore
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+// @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+// @ts-ignore
+import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+// @ts-ignore
+import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
 // @ts-ignore
 import MessageInput from '@/components/MessageInput/MessageInput.vue';
 // @ts-ignore
 import RecipientInput from '@/components/RecipientInput/RecipientInput.vue';
 // @ts-ignore
 import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
-// @ts-ignore
-import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
-// @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
-// @ts-ignore
-import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+// internal dependencies
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { ProfileService } from '@/services/ProfileService';
-import { AccountService } from '@/services/AccountService';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { Signer } from '@/store/Account';
 import { SettingsModel } from '@/core/database/entities/SettingsModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+import { AccountService } from '@/services/AccountService';
+import { ProfileService } from '@/services/ProfileService';
 import { SettingService } from '@/services/SettingService';
+import { Signer } from '@/store/Account';
 // @ts-ignore
 import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue';
 import _ from 'lodash';
+import { Address, SignedTransaction } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -66,6 +65,7 @@ import _ from 'lodash';
     computed: {
         ...mapGetters({
             currentProfile: 'profile/currentProfile',
+            allNetworkModels: 'network/allNetworkModels',
             isAuthenticated: 'profile/isAuthenticated',
         }),
     },
@@ -76,6 +76,7 @@ export class FormOfflineTransferTransactionTs extends Vue {
      */
     public packageVersion = process.env.PACKAGE_VERSION || '0';
 
+    public allNetworkModels: Record<string, NetworkModel>;
     /**
      * All known profiles
      */
@@ -84,10 +85,10 @@ export class FormOfflineTransferTransactionTs extends Vue {
     /**
      * Profiles indexed by network type
      */
-    private profilesClassifiedByNetworkType: {
-        networkType: NetworkType;
+    private profilesClassifiedByGenerationHash: {
+        generationHash: string;
         profiles: ProfileModel[];
-    }[];
+    }[] = [];
 
     private performingLogin = false;
 
@@ -107,12 +108,6 @@ export class FormOfflineTransferTransactionTs extends Vue {
     public profileService = new ProfileService();
 
     public accountService = new AccountService();
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Form items
@@ -147,9 +142,9 @@ export class FormOfflineTransferTransactionTs extends Vue {
             return;
         }
 
-        const profilesGroupedByNetworkType = _.groupBy(this.profiles, (p) => p.networkType);
-        this.profilesClassifiedByNetworkType = Object.values(profilesGroupedByNetworkType).map((profiles) => ({
-            networkType: profiles[0].networkType,
+        const profilesGroupedByGenerationHash = _.groupBy(this.profiles, (p) => p.generationHash);
+        this.profilesClassifiedByGenerationHash = Object.values(profilesGroupedByGenerationHash).map((profiles) => ({
+            generationHash: profiles[0].generationHash,
             profiles: profiles,
         }));
 
@@ -157,14 +152,13 @@ export class FormOfflineTransferTransactionTs extends Vue {
         this.formItems.currentProfileName = this.profiles[0].profileName;
         this.onProfileNameChange();
     }
-
     /**
      * Getter for network type label
-     * @param {NetworkType} networkType
+     * @param  generationHash
      * @return {string}
      */
-    public getNetworkTypeLabel(networkType: NetworkType): string {
-        return NetworkTypeHelper.getNetworkTypeLabel(networkType);
+    public getGenerationHashLabel(generationHash: string): string {
+        return this.allNetworkModels[generationHash]?.name || 'Loading...';
     }
 
     /**
@@ -199,7 +193,10 @@ export class FormOfflineTransferTransactionTs extends Vue {
 
         const settingService = new SettingService();
 
-        const settings: SettingsModel = settingService.getProfileSettings(currentProfileName, profile.networkType);
+        const settings: SettingsModel = settingService.getProfileSettings(
+            currentProfileName,
+            this.allNetworkModels[profile.generationHash],
+        );
 
         const knownAccounts: AccountModel[] = this.accountService.getKnownAccounts(profile.accounts);
 
@@ -217,7 +214,7 @@ export class FormOfflineTransferTransactionTs extends Vue {
         }
 
         await this.$store.dispatch('profile/SET_CURRENT_PROFILE', profile);
-        await this.$store.dispatch('network/CONNECT', { networkType: profile.networkType, isOffline: true });
+        await this.$store.dispatch('network/CONNECT', { isOffline: true });
         this.$store.dispatch('account/SET_KNOWN_ACCOUNTS', profile.accounts);
         await this.$store.dispatch('account/SET_CURRENT_ACCOUNT', defaultAccount);
         this.$store.dispatch('diagnostic/ADD_DEBUG', 'Profile login successful with currentProfileName: ' + currentProfileName);

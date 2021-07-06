@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
+import { appConfig, feesConfig } from '@/config';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { SettingsModel } from '@/core/database/entities/SettingsModel';
-
-import { feesConfig } from '@/config';
-import { appConfig } from '@/config';
-import { networkConfig } from '@/config';
-import i18n from '@/language';
 import { SettingsModelStorage } from '@/core/database/storage/SettingsModelStorage';
-import { NetworkType } from 'symbol-sdk';
+import i18n from '@/language';
 
 /**
  * Service in charge of loading and storing the SettingsModel from local storage.
@@ -31,28 +28,29 @@ export class SettingService {
      */
     private readonly storage = SettingsModelStorage.INSTANCE;
 
-    public getProfileSettings(profileName: string, networkType: NetworkType): SettingsModel {
+    public getProfileSettings(profileName: string, networkModel: NetworkModel): SettingsModel {
         const storedData = this.storage.get() || {};
         return {
-            ...this.createDefaultSettingsModel(profileName, networkType),
+            ...this.createDefaultSettingsModel(profileName, networkModel),
             ...(storedData[profileName] || {}),
         };
     }
 
-    public changeProfileSettings(profileName: string, newConfigs: any, networkType: NetworkType): SettingsModel {
+    public changeProfileSettings(profileName: string, newConfigs: any, networkModel: NetworkModel): SettingsModel {
         const storedData = this.storage.get() || {};
         storedData[profileName] = {
-            ...this.getProfileSettings(profileName, networkType),
+            ...this.getProfileSettings(profileName, networkModel),
             ...newConfigs,
         };
         this.storage.set(storedData);
         return storedData[profileName];
     }
 
-    public createDefaultSettingsModel(profileName: string, networkType: NetworkType): SettingsModel {
+    public createDefaultSettingsModel(profileName: string, networkModel: NetworkModel): SettingsModel {
         const browserLocale = i18n.locale;
+        const explorerUrl = networkModel.explorerUrl;
         const language = appConfig.languages.find((l) => l.value == browserLocale) ? browserLocale : appConfig.languages[0].value;
-        return new SettingsModel(profileName, language, feesConfig.slowest, '', networkConfig[networkType].explorerUrl);
+        return new SettingsModel(profileName, language, feesConfig.slowest, '', explorerUrl);
     }
 
     public deleteProfileSettings(profileName: string): void {

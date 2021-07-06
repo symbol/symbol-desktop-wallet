@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { ValidationProvider } from 'vee-validate';
-// internal dependencies
-import { AddressBook, IContact } from 'symbol-address-book';
-// child components
 // @ts-ignore
-import MosaicAmountDisplay from '@/components/MosaicAmountDisplay/MosaicAmountDisplay.vue';
+import AmountDisplay from '@/components/AmountDisplay/AmountDisplay.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormLabel from '@/components/FormLabel/FormLabel.vue';
+// child components
+// @ts-ignore
+import MosaicAmountDisplay from '@/components/MosaicAmountDisplay/MosaicAmountDisplay.vue';
+// @ts-ignore
+import NavigationLinks from '@/components/NavigationLinks/NavigationLinks.vue';
+import { UIHelpers } from '@/core/utils/UIHelpers';
+// @ts-ignore
+import ModalBackupProfile from '@/views/modals/ModalBackupProfile/ModalBackupProfile.vue';
+// @ts-ignore
+import ModalContactCreation from '@/views/modals/ModalContactCreation/ModalContactCreation.vue';
 // @ts-ignore
 import ModalFormSubAccountCreation from '@/views/modals/ModalFormSubAccountCreation/ModalFormSubAccountCreation.vue';
 // @ts-ignore
 import ModalImportAddressBook from '@/views/modals/ModalImportAddressBook/ModalImportAddressBook.vue';
-// @ts-ignore
-import AmountDisplay from '@/components/AmountDisplay/AmountDisplay.vue';
-// @ts-ignore
-import ModalBackupProfile from '@/views/modals/ModalBackupProfile/ModalBackupProfile.vue';
-// @ts-ignore
-import NavigationLinks from '@/components/NavigationLinks/NavigationLinks.vue';
-// @ts-ignore
-import ModalContactCreation from '@/views/modals/ModalContactCreation/ModalContactCreation.vue';
-import { UIHelpers } from '@/core/utils/UIHelpers';
+// internal dependencies
+import { AddressBook, IContact } from 'symbol-address-book';
+import { ValidationProvider } from 'vee-validate';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {

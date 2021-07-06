@@ -20,6 +20,6 @@ describe.skip('services/NetworkService', () => {
     test('getNetworkModel when custom', async () => {
         const candidate = 'http://api-01.eu-central-1.symboldev.network:3000';
         const data = await networkService.getNetworkModel(candidate).toPromise();
-        expect(data.networkModel.url).toBe(candidate);
+        expect(data.networkModel.nodes.find((n) => n.url === candidate)).toBeDefined();
     });
 });

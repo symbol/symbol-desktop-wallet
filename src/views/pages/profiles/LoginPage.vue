@@ -6,6 +6,10 @@
                     <Icon type="ios-cloud-download-outline" class="navbar-icon white" />
                     <span class="color white">{{ $t('go_to_offline_transactions') }}</span>
                 </button>
+                <button class="trigger-accountlink" @click="$router.push('connectToNewNetwork')">
+                    <Icon type="ios-cloud-circle-outline" class="navbar-icon white" />
+                    <span class="color white">{{ $t('connect_to_new_network') }}</span>
+                </button>
                 <img class="language_icon" :src="require('@/views/resources/img/login/language.svg')" alt="" />
                 <LanguageSelector />
             </div>
@@ -38,18 +42,20 @@
                                     <AutoComplete
                                         v-model="formItems.currentProfileName"
                                         placeholder=" "
-                                        :class="['select-account', !profilesClassifiedByNetworkType ? 'un_click' : 'profile-name-input']"
+                                        :class="['select-account', !profilesClassifiedByGenerationHash ? 'un_click' : 'profile-name-input']"
                                         :disabled="performingLogin"
                                     >
                                         <div class="auto-complete-sub-container scroll">
                                             <div class="tips-in-sub-container">
-                                                {{ $t(profilesClassifiedByNetworkType ? 'select_a_profile' : 'no_profiles_in_database') }}
+                                                {{
+                                                    $t(profilesClassifiedByGenerationHash ? 'select_a_profile' : 'no_profiles_in_database')
+                                                }}
                                             </div>
-                                            <div v-if="profilesClassifiedByNetworkType">
-                                                <div v-for="pair in profilesClassifiedByNetworkType" :key="pair.networkType">
+                                            <div v-if="profilesClassifiedByGenerationHash">
+                                                <div v-for="pair in profilesClassifiedByGenerationHash" :key="pair.generationHash">
                                                     <div v-if="pair.profiles.length">
                                                         <span class="network-type-head-title">{{
-                                                            getNetworkTypeLabel(pair.networkType)
+                                                            getGenerationHashLabel(pair.generationHash)
                                                         }}</span>
                                                     </div>
                                                     <Option
@@ -80,10 +86,10 @@
                                     <input
                                         v-model="formItems.password"
                                         v-focus
-                                        :class="[!profilesClassifiedByNetworkType ? 'un_click' : '']"
+                                        :class="[!profilesClassifiedByGenerationHash ? 'un_click' : '']"
                                         :placeholder="$t('please_enter_your_account_password')"
                                         type="password"
-                                        :disabled="!profilesClassifiedByNetworkType || performingLogin"
+                                        :disabled="!profilesClassifiedByGenerationHash || performingLogin"
                                     />
                                 </ErrorTooltip>
                             </ValidationProvider>
@@ -113,7 +119,7 @@
                                 {{ $t('password_hint') }}: {{ getPasswordHint() }}
                             </div>
                             <Button
-                                v-if="profilesClassifiedByNetworkType"
+                                v-if="profilesClassifiedByGenerationHash"
                                 class="pointer button"
                                 :loading="performingLogin"
                                 html-type="submit"

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Account, NetworkType, Password, Crypto, Address } from 'symbol-sdk';
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+// internal dependencies
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
 import { ProfileService } from '@/services/ProfileService';
+import { Account, Address, Crypto, NetworkType, Password } from 'symbol-sdk';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 @Component({
     components: {
         ValidationProvider,
@@ -43,7 +43,7 @@ import { ProfileService } from '@/services/ProfileService';
         }),
     },
 })
-export class FormProfileUnlockTs extends Vue {
+export class FormProfileUnlockTs extends ValidatedComponent {
     /**
      * Current network type
      * @var {NetworkType}
@@ -55,12 +55,6 @@ export class FormProfileUnlockTs extends Vue {
      * @var {AccountModel}
      */
     public currentAccount: AccountModel;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Form items

@@ -1,3 +1,16 @@
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { OfflineNetworkCurrencies, OfflineUrl } from '@/services/offline/MockModels';
+import { OfflineAccountRepository } from '@/services/offline/OfflineAccountRepository';
+import { OfflineChainRepository } from '@/services/offline/OfflineChainRepository';
+import { OfflineListener } from '@/services/offline/OfflineListener';
+import { OfflineMetadataRepository } from '@/services/offline/OfflineMetadataRepository';
+import { OfflineMosaicRepository } from '@/services/offline/OfflineMosaicRepository';
+import { OfflineMultisigRepository } from '@/services/offline/OfflineMultisigRepository';
+import { OfflineNamespaceRepository } from '@/services/offline/OfflineNamespaceRepository';
+import { OfflineNetworkRepository } from '@/services/offline/OfflineNetworkRepository';
+import { OfflineNodeRepository } from '@/services/offline/OfflineNodeRepository';
+import { OfflineTransactionRepository } from '@/services/offline/OfflineTransactionRepository';
+import { Observable, of } from 'rxjs';
 import {
     AccountRepository,
     BlockHttp,
@@ -29,21 +42,9 @@ import {
     TransactionStatusHttp,
     TransactionStatusRepository,
 } from 'symbol-sdk';
-import { Observable, of } from 'rxjs';
-import { OfflineGenerationHash, OfflineNetworkCurrencies, OfflineUrl } from '@/services/offline/MockModels';
-import { OfflineNetworkRepository } from '@/services/offline/OfflineNetworkRepository';
-import { OfflineNodeRepository } from '@/services/offline/OfflineNodeRepository';
-import { OfflineChainRepository } from '@/services/offline/OfflineChainRepository';
-import { OfflineListener } from '@/services/offline/OfflineListener';
-import { OfflineTransactionRepository } from '@/services/offline/OfflineTransactionRepository';
-import { OfflineMetadataRepository } from '@/services/offline/OfflineMetadataRepository';
-import { OfflineAccountRepository } from '@/services/offline/OfflineAccountRepository';
-import { OfflineNamespaceRepository } from '@/services/offline/OfflineNamespaceRepository';
-import { OfflineMosaicRepository } from '@/services/offline/OfflineMosaicRepository';
-import { OfflineMultisigRepository } from '@/services/offline/OfflineMultisigRepository';
 
 export class OfflineRepositoryFactory implements RepositoryFactory {
-    constructor(private readonly networkType: NetworkType) {}
+    constructor(private readonly networkModel: NetworkModel) {}
 
     createAccountRepository(): AccountRepository {
         return new OfflineAccountRepository();
@@ -89,11 +90,11 @@ export class OfflineRepositoryFactory implements RepositoryFactory {
     }
 
     createNetworkRepository(): NetworkRepository {
-        return new OfflineNetworkRepository(this.networkType);
+        return new OfflineNetworkRepository(this.networkModel);
     }
 
     createNodeRepository(): NodeRepository {
-        return new OfflineNodeRepository(this.networkType);
+        return new OfflineNodeRepository(this.networkModel);
     }
 
     createReceiptRepository(): ReceiptRepository {
@@ -126,7 +127,7 @@ export class OfflineRepositoryFactory implements RepositoryFactory {
     }
 
     getCurrencies(): Observable<NetworkCurrencies> {
-        return of(OfflineNetworkCurrencies(this.networkType));
+        return of(OfflineNetworkCurrencies(this.networkModel));
     }
 
     getEpochAdjustment(): Observable<number> {
@@ -135,11 +136,11 @@ export class OfflineRepositoryFactory implements RepositoryFactory {
     }
 
     getGenerationHash(): Observable<string> {
-        return of(OfflineGenerationHash[this.networkType]);
+        return of(this.networkModel.generationHash);
     }
 
     getNetworkType(): Observable<NetworkType> {
-        return of(this.networkType);
+        return of(this.networkModel.networkType);
     }
 
     getNodePublicKey(): Observable<string | undefined> {

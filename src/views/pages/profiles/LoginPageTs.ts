@@ -13,37 +13,39 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { mapGetters } from 'vuex';
-import { Component, Vue } from 'vue-property-decorator';
-import { NetworkType, Password } from 'symbol-sdk';
-import VideoBackground from 'vue-responsive-video-background-player';
-
-// internal dependencies
-import { $eventBus } from '@/events';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-import { ProfileService } from '@/services/ProfileService';
-// child components
-// @ts-ignore
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { SettingsModel } from '@/core/database/entities/SettingsModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+// internal dependencies
+import { $eventBus } from '@/events';
+import { AccountService } from '@/services/AccountService';
+import { ProfileService } from '@/services/ProfileService';
 // configuration
 import { SettingService } from '@/services/SettingService';
-import { SettingsModel } from '@/core/database/entities/SettingsModel';
-import { AccountService } from '@/services/AccountService';
-import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
 import { officialIcons } from '@/views/resources/Images';
 import _ from 'lodash';
+import { Password } from 'symbol-sdk';
+// child components
+// @ts-ignore
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import VideoBackground from 'vue-responsive-video-background-player';
+import { mapGetters } from 'vuex';
+
 @Component({
     computed: {
         ...mapGetters({
             currentProfile: 'profile/currentProfile',
             isAuthenticated: 'profile/isAuthenticated',
+            generationHash: 'network/generationHash',
+            allNetworkModels: 'network/allNetworkModels',
         }),
     },
     components: {
@@ -54,11 +56,13 @@ import _ from 'lodash';
         VideoBackground,
     },
 })
-export default class LoginPageTs extends Vue {
+export default class LoginPageTs extends ValidatedComponent {
     /**
      * Display the application version. This is injected in the app when built.
      */
     public packageVersion = process.env.PACKAGE_VERSION || '0';
+
+    public allNetworkModels: Record<string, NetworkModel>;
 
     /**
      * All known profiles
@@ -68,8 +72,8 @@ export default class LoginPageTs extends Vue {
     /**
      * Profiles indexed by network type
      */
-    private profilesClassifiedByNetworkType: {
-        networkType: NetworkType;
+    private profilesClassifiedByGenerationHash: {
+        generationHash: string;
         profiles: ProfileModel[];
     }[] = [];
 
@@ -82,6 +86,8 @@ export default class LoginPageTs extends Vue {
      */
     public currentProfile: ProfileModel;
 
+    private generationHash: string;
+
     /**
      * Profiles repository
      * @var {ProfileService}
@@ -89,12 +95,6 @@ export default class LoginPageTs extends Vue {
     public profileService = new ProfileService();
 
     public accountService = new AccountService();
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Form items
@@ -122,10 +122,9 @@ export default class LoginPageTs extends Vue {
         if (!this.profiles.length) {
             return;
         }
-
-        const profilesGroupedByNetworkType = _.groupBy(this.profiles, (p) => p.networkType);
-        this.profilesClassifiedByNetworkType = Object.values(profilesGroupedByNetworkType).map((profiles) => ({
-            networkType: profiles[0].networkType,
+        const profilesGroupedByGenerationHash = _.groupBy(this.profiles, (p) => p.generationHash);
+        this.profilesClassifiedByGenerationHash = Object.values(profilesGroupedByGenerationHash).map((profiles) => ({
+            generationHash: profiles[0].generationHash,
             profiles: profiles,
         }));
 
@@ -135,11 +134,11 @@ export default class LoginPageTs extends Vue {
 
     /**
      * Getter for network type label
-     * @param {NetworkType} networkType
+     * @param {generationHash} string
      * @return {string}
      */
-    public getNetworkTypeLabel(networkType: NetworkType): string {
-        return NetworkTypeHelper.getNetworkTypeLabel(networkType);
+    public getGenerationHashLabel(generationHash: string): string {
+        return this.allNetworkModels[generationHash]?.name || 'Loading...';
     }
 
     /**
@@ -206,7 +205,10 @@ export default class LoginPageTs extends Vue {
             }
 
             // profile exists, fetch data
-            const settings: SettingsModel = settingService.getProfileSettings(currentProfileName, profile.networkType);
+            const settings: SettingsModel = settingService.getProfileSettings(
+                currentProfileName,
+                this.allNetworkModels[profile.generationHash],
+            );
 
             const knownAccounts: AccountModel[] = this.accountService.getKnownAccounts(profile.accounts);
             if (knownAccounts.length == 0) {
@@ -246,7 +248,7 @@ export default class LoginPageTs extends Vue {
 
             // LOGIN SUCCESS: update app state
             await this.$store.dispatch('profile/SET_CURRENT_PROFILE', profile);
-            await this.$store.dispatch('network/CONNECT', { networkType: profile.networkType });
+            await this.$store.dispatch('network/CONNECT', {});
             this.$store.dispatch('account/SET_KNOWN_ACCOUNTS', profile.accounts);
             await this.$store.dispatch('account/SET_CURRENT_ACCOUNT', defaultAccount);
             this.$store.dispatch('diagnostic/ADD_DEBUG', 'Profile login successful with currentProfileName: ' + currentProfileName);
@@ -254,7 +256,8 @@ export default class LoginPageTs extends Vue {
             await this.$store.dispatch('network/REST_NETWORK_RENTAL_FEES');
             return this.$router.push({ name: 'dashboard' });
         } catch (e) {
-            console.log('Unknown error trying to login', JSON.stringify(e));
+            console.log(e);
+            console.log('Unknown error trying to login', e.message || `${e}`);
             return this.$store.dispatch('notification/ADD_ERROR', `Unknown error trying to login: ${JSON.stringify(e)}`);
         }
     }

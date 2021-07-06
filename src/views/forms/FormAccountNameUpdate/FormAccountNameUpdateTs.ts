@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { NetworkType } from 'symbol-sdk';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { AccountModel } from '@/core/database/entities/AccountModel';
-import { NotificationType } from '@/core/utils/NotificationType';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
-import ModalFormProfileUnlock from '@/views/modals/ModalFormProfileUnlock/ModalFormProfileUnlock.vue';
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { AccountModel } from '@/core/database/entities/AccountModel';
 import { FilterHelpers } from '@/core/utils/FilterHelpers';
+import { NotificationType } from '@/core/utils/NotificationType';
+// @ts-ignore
+import ModalFormProfileUnlock from '@/views/modals/ModalFormProfileUnlock/ModalFormProfileUnlock.vue';
+import { NetworkType } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -48,7 +47,7 @@ import { FilterHelpers } from '@/core/utils/FilterHelpers';
         }),
     },
 })
-export class FormAccountNameUpdateTs extends Vue {
+export class FormAccountNameUpdateTs extends ValidatedComponent {
     /**
      * Currently active profile
      * @see {Store.Account}
@@ -62,12 +61,6 @@ export class FormAccountNameUpdateTs extends Vue {
      * @var {NetworkType}
      */
     public networkType: NetworkType;
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Whether account is currently being unlocked

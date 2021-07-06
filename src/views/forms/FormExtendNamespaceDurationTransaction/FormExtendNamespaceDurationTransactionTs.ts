@@ -14,22 +14,21 @@
  *
  */
 // external dependencies
-import { Component, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { FormNamespaceRegistrationTransactionTs } from '../FormNamespaceRegistrationTransaction/FormNamespaceRegistrationTransactionTs';
-import { NamespaceId } from 'symbol-sdk';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
 // configuration
 // child components
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
-import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
-// @ts-ignore
 import RentalFee from '@/components/RentalFees/RentalFee.vue';
-import { NamespaceService } from '@/services/NamespaceService';
 import { NamespaceModel } from '@/core/database/entities/NamespaceModel';
+import { NamespaceService } from '@/services/NamespaceService';
+// @ts-ignore
+import ModalTransactionConfirmation from '@/views/modals/ModalTransactionConfirmation/ModalTransactionConfirmation.vue';
+import { NamespaceId } from 'symbol-sdk';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+// internal dependencies
+import { FormNamespaceRegistrationTransactionTs } from '../FormNamespaceRegistrationTransaction/FormNamespaceRegistrationTransactionTs';
 
 @Component({
     components: { ErrorTooltip, ModalTransactionConfirmation, RentalFee },
@@ -43,11 +42,7 @@ export class FormExtendNamespaceDurationTransactionTs extends FormNamespaceRegis
     @Prop({ default: null, required: true }) namespaceId: NamespaceId;
 
     private namespaces: NamespaceModel[];
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
+
     /**
      * Current namespace info
      * @readonly

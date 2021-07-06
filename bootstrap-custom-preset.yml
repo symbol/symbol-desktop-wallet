@@ -1,0 +1,5 @@
+nemesisGenerationHashSeed: 3014ABD6C23C84190617E6C259E3EF0C512509B4AC3A16128BFC635683C896B6
+# CHANGE TO ANOTHER NETWORK TYPE ONCE FAUCET FIXES https://github.com/nemgrouplimited/symbol-faucet/issues/72
+networkType: 152
+preset: bootstrap
+assembly: full

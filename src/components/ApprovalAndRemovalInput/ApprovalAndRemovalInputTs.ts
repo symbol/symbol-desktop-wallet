@@ -14,19 +14,15 @@
  *
  */
 // external dependencies
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { MultisigAccountInfo } from 'symbol-sdk';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-// configuration
-import { mapGetters } from 'vuex';
-import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { MultisigAccountInfo } from 'symbol-sdk';
+// child components
+import { ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
 
 @Component({
     components: {
@@ -34,13 +30,8 @@ import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfi
         ErrorTooltip,
         FormRow,
     },
-    computed: {
-        ...mapGetters({
-            networkConfiguration: 'network/networkConfiguration',
-        }),
-    },
 })
-export class ApprovalAndRemovalInputTs extends Vue {
+export class ApprovalAndRemovalInputTs extends ValidatedComponent {
     /**
      * Value bound to the form v-model
      * @type {number}
@@ -76,8 +67,6 @@ export class ApprovalAndRemovalInputTs extends Vue {
         default: null,
     })
     multisig: MultisigAccountInfo;
-
-    private networkConfiguration: NetworkConfigurationModel;
 
     /// region computed properties getter/setter
     /**
@@ -126,12 +115,6 @@ export class ApprovalAndRemovalInputTs extends Vue {
         }
         return this.multisig.minRemoval;
     }
-
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    protected validationRules = ValidationRuleset;
 
     /**
      * Available input choices

@@ -1,123 +1,29 @@
+import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import {
     AccountInfo,
     AccountNames,
+    AccountType,
+    Address,
     ChainInfo,
-    ChainProperties,
     Currency,
     FinalizedBlock,
     MosaicId,
     MultisigAccountGraphInfo,
     NamespaceId,
     NamespaceName,
-    NetworkConfiguration,
     NetworkCurrencies,
-    NetworkProperties,
-    NetworkType,
     NodeInfo,
-    PluginProperties,
     RentalFees,
     StorageInfo,
-    TransactionFees,
+    SupplementalPublicKeys,
     UInt64,
 } from 'symbol-sdk';
-import { NodeIdentityEqualityStrategy } from 'symbol-openapi-typescript-fetch-client';
-import { Address } from 'symbol-sdk';
-import { AccountType } from 'symbol-sdk';
-import { SupplementalPublicKeys } from 'symbol-sdk';
-import { networkConfig } from '@/config';
 
-export const OfflineUrl = 'http://mock:3000';
+export const OfflineUrl = 'http://mock.com:3000';
 
-export const OfflineGenerationHash = {
-    [NetworkType.TEST_NET]: networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.generationHash,
-    [NetworkType.MAIN_NET]: networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.generationHash,
-};
-
-// use 100 as min fee multiplier for offline transaction.
-export const OfflineTransactionFees = new TransactionFees(84587, 100, 1136363, 0, 100);
-
-export const OfflineNodeInfo = (networkType: NetworkType) =>
-    new NodeInfo('pubkey', OfflineGenerationHash[networkType], 3000, networkType, 0, [], 'host', 'name');
-
-export const OfflineNetworkProperties = {
-    [NetworkType.TEST_NET]: new NetworkConfiguration(
-        new NetworkProperties(
-            'public-test',
-            NodeIdentityEqualityStrategy.Host,
-            '071964D3C040D62DE905EAE978E2119BFC8E70489BFDF45A85B3D7ED5A517AA8',
-            OfflineGenerationHash[NetworkType.TEST_NET],
-            networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.epochAdjustment + 's',
-        ),
-        new ChainProperties(
-            true,
-            true,
-            '0x' + networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.currencyMosaicId,
-            '0x' + networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.harvestingMosaicId,
-            networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.blockGenerationTargetTime + 's',
-            '3000',
-            '180',
-            '5',
-            '0',
-            '60',
-            "1'000",
-            '6h',
-            '500ms',
-            "7'831'975'436'000'000",
-            "9'000'000'000'000'000",
-            `${networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults.maxMosaicAtomicUnits}`,
-            "10'000'000'000",
-            "50'000'000'000'000",
-            "3'000'000'000'000",
-            '720',
-            '3',
-            '28',
-            '26280',
-            '25',
-            '5',
-            'TDGY4DD2U4YQQGERFMDQYHPYS6M7LHIF6XUCJ4Q',
-            "6'000",
-        ),
-        new PluginProperties(),
-    ),
-    [NetworkType.MAIN_NET]: new NetworkConfiguration(
-        new NetworkProperties(
-            'public',
-            NodeIdentityEqualityStrategy.Host,
-            '78F0F6FFDE5C130777506FE2A597ADC5E98BD46041ABF775908299FE94BFD5D0',
-            OfflineGenerationHash[NetworkType.MAIN_NET],
-            networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.epochAdjustment + 's',
-        ),
-        new ChainProperties(
-            true,
-            true,
-            '0x' + networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.currencyMosaicId,
-            '0x' + networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.harvestingMosaicId,
-            networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.blockGenerationTargetTime + 's',
-            '3000',
-            '180',
-            '5',
-            '0',
-            '60',
-            "1'000",
-            '6h',
-            '500ms',
-            "7'831'975'436'000'000",
-            "9'000'000'000'000'000",
-            `${networkConfig[NetworkType.MAIN_NET].networkConfigurationDefaults.maxMosaicAtomicUnits}`,
-            "10'000'000'000",
-            "50'000'000'000'000",
-            "3'000'000'000'000",
-            "3'000'000'000'000",
-            '3',
-            '28',
-            '26280',
-            '25',
-            '5',
-            'NAMV77WU2EUFC6FBDFBQCDQARAGUTCRFDN7YLVA',
-            "6'000",
-        ),
-        new PluginProperties(),
-    ),
+export const OfflineNodeInfo = (networkModel: NetworkModel): NodeInfo => {
+    return new NodeInfo('pubkey', networkModel.generationHash, 3000, networkModel.networkType, 0, [], 'host', 'name');
 };
 
 export const OfflineChainInfo = new ChainInfo(
@@ -153,14 +59,18 @@ export const OfflineNamespaceNames = (namespaceId: NamespaceId) => new Namespace
 
 export const OfflineMultisigAccountGraphInfo = new MultisigAccountGraphInfo(new Map());
 
-export const OfflineNetworkCurrencies = (networkType: NetworkType): NetworkCurrencies => {
-    const publicCurrency = new Currency({
-        namespaceId: new NamespaceId('symbol.xym'),
-        divisibility: 6,
-        transferable: true,
-        supplyMutable: false,
-        restrictable: false,
-        mosaicId: new MosaicId(networkConfig[networkType].networkConfigurationDefaults.currencyMosaicId),
-    });
-    return new NetworkCurrencies(publicCurrency, publicCurrency);
+export const OfflineNetworkCurrencies = (networkModel: NetworkModel): NetworkCurrencies => {
+    const toCurrency = (currency: NetworkCurrencyModel) =>
+        new Currency({
+            namespaceId: NamespaceId.createFromEncoded(currency.namespaceIdHex),
+            divisibility: currency.divisibility,
+            transferable: currency.transferable,
+            supplyMutable: currency.supplyMutable,
+            restrictable: currency.restrictable,
+            mosaicId: new MosaicId(currency.mosaicIdHex),
+        });
+    return new NetworkCurrencies(
+        toCurrency(networkModel.networkCurrencies.networkCurrency),
+        toCurrency(networkModel.networkCurrencies.harvestCurrency || networkModel.networkCurrencies.networkCurrency),
+    );
 };

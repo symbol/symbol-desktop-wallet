@@ -14,12 +14,12 @@
  *
  */
 
+import { defaultTestnetNetworkConfig } from '@/config';
+import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage';
 import { VersionedObjectStorage } from '@/core/database/backends/VersionedObjectStorage';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { defaultTestnetNetworkConfig } from '@/config';
-import * as _ from 'lodash';
-import { SimpleObjectStorage } from '@/core/database/backends/SimpleObjectStorage';
 import { VersionedModel } from '@/core/database/entities/VersionedModel';
+import * as _ from 'lodash';
 
 export class ProfileModelStorage extends VersionedObjectStorage<Record<string, ProfileModel>> {
     /**
@@ -89,10 +89,10 @@ export class ProfileModelStorage extends VersionedObjectStorage<Record<string, P
                         const modified: any = from;
                         profiles.map((name: string) => {
                             // Keeping the same accounts but linking to the new testnet. Existing accounts would be back to 0.
-                            if (modified[name].networkType === defaultTestnetNetworkConfig.defaultNetworkType) {
+                            if (modified[name].networkType === defaultTestnetNetworkConfig.networkType) {
                                 modified[name] = {
                                     ...modified[name],
-                                    generationHash: defaultTestnetNetworkConfig.networkConfigurationDefaults.generationHash,
+                                    generationHash: defaultTestnetNetworkConfig.generationHash,
                                     selectedNodeUrlToConnect: _.sample(defaultTestnetNetworkConfig.nodes).url, // Random url.
                                 };
                             }

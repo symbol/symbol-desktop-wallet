@@ -1,10 +1,6 @@
 <template>
     <div class="check-mnemonic-sec">
-        <div
-            v-if="currentProfile.networkType === networkType.TEST_NET"
-            class="skip pointer"
-            @click="$router.push({ name: 'profiles.createProfile.finalize' })"
-        >
+        <div v-if="canSkip" class="skip pointer" @click="$router.push({ name: 'profiles.createProfile.finalize' })">
             {{ $t('skip') }}
         </div>
         <p class="set-title-create">

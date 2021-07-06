@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { MnemonicPassPhrase } from 'symbol-hd-wallets';
 // internal dependencies
 // child components
 // @ts-ignore
 import MnemonicVerification from '@/components/MnemonicVerification/MnemonicVerification.vue';
-import { NotificationType } from '@/core/utils/NotificationType';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+import { MnemonicPassPhrase } from 'symbol-hd-wallets';
 import { NetworkType } from 'symbol-sdk';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -42,7 +42,6 @@ export default class VerifyMnemonicTs extends Vue {
      */
     public currentMnemonic: MnemonicPassPhrase;
     public currentProfile: ProfileModel;
-    public networkType = NetworkType;
     /// region computed properties getter/setter
     get mnemonicWordsList(): string[] {
         if (this.currentMnemonic) {
@@ -52,5 +51,12 @@ export default class VerifyMnemonicTs extends Vue {
         this.$router.push({ name: 'profiles.createProfile.info' });
     }
 
+    get canSkip(): boolean {
+        return (
+            this.currentProfile.networkType == NetworkType.MIJIN_TEST ||
+            this.currentProfile.networkType == NetworkType.PRIVATE_TEST ||
+            this.currentProfile.networkType == NetworkType.TEST_NET
+        );
+    }
     /// end-region computed properties getter/setter
 }

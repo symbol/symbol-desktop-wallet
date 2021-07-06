@@ -13,28 +13,26 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { Password, Crypto, Account } from 'symbol-sdk';
-// internal dependencies
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { ProfileService } from '@/services/ProfileService';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
-import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
-// @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
-import ModalFormProfileUnlock from '@/views/modals/ModalFormProfileUnlock/ModalFormProfileUnlock.vue';
-import { NotificationType } from '@/core/utils/NotificationType';
-import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { AccountService } from '@/services/AccountService';
-import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
+import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
 // @ts-ignore
 import PasswordInput from '@/components/PasswordInput/PasswordInput.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
+import { ProfileModel } from '@/core/database/entities/ProfileModel';
+import { NotificationType } from '@/core/utils/NotificationType';
+import { AccountService } from '@/services/AccountService';
+import { ProfileService } from '@/services/ProfileService';
+// @ts-ignore
+import ModalFormProfileUnlock from '@/views/modals/ModalFormProfileUnlock/ModalFormProfileUnlock.vue';
+import { Account, Crypto, Password } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 @Component({
     components: {
         ValidationObserver,
@@ -48,25 +46,17 @@ import PasswordInput from '@/components/PasswordInput/PasswordInput.vue';
     computed: {
         ...mapGetters({
             currentProfile: 'profile/currentProfile',
-            networkConfiguration: 'network/networkConfiguration',
             isSettingVisible: 'profile/isSettingVisible',
         }),
     },
 })
-export class FormProfilePasswordUpdateTs extends Vue {
+export class FormProfilePasswordUpdateTs extends ValidatedComponent {
     /**
      * Currently active profile
      * @see {Store.Profile}
      * @var {ProfileModel}
      */
     public currentProfile: ProfileModel;
-
-    private networkConfiguration: NetworkConfigurationModel;
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
 
     /**
      * Whether account is currently being unlocked

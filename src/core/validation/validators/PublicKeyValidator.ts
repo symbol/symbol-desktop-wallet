@@ -14,19 +14,19 @@
  *
  */
 import { NetworkType, PublicAccount } from 'symbol-sdk';
-
 // internal dependencies
-import { Validator, staticImplements } from './Validator';
+import { staticImplements, Validator } from './Validator';
 
 @staticImplements<Validator>()
 export class PublicKeyValidator {
     /**
      * Executes the validator
      * @static
-     * @param {*} value
+     * @param value the value to be validated
+     * @param networkType: network TYpe
      * @returns {boolean}
      */
-    public static validate(value: any, networkType?: NetworkType): boolean {
+    public static validate(value: any, networkType: NetworkType): boolean {
         try {
             PublicAccount.createFromPublicKey(value, networkType);
             return value;

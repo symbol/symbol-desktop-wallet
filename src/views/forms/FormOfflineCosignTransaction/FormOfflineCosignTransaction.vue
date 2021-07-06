@@ -13,9 +13,9 @@
                         @on-change="onProfileNameChange"
                     >
                         <OptionGroup
-                            v-for="pair in profilesClassifiedByNetworkType"
-                            :key="pair.networkType"
-                            :label="getNetworkTypeLabel(pair.networkType)"
+                            v-for="pair in profilesClassifiedByGenerationHash"
+                            :key="pair.generationHash"
+                            :label="getGenerationHashLabel(pair.generationHash)"
                         >
                             <Option v-for="profile in pair.profiles" :key="profile.profileName" :value="profile.profileName">
                                 {{ profile.profileName }}

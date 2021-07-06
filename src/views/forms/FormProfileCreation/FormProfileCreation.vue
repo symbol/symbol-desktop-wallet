@@ -47,12 +47,16 @@
                                 <ErrorTooltip :errors="errors">
                                     <div class="inputs-create-container select-container">
                                         <Select
-                                            v-model="formItems.networkType"
+                                            v-model="formItems.generationHash"
                                             :placeholder="$t('choose_network')"
                                             class="select-size select-style"
                                         >
-                                            <Option v-for="(item, index) in networkTypeList" :key="index" :value="item.value">
-                                                {{ item.label }}
+                                            <Option
+                                                v-for="(item, index) in Object.values(allNetworkModels)"
+                                                :key="index"
+                                                :value="item.generationHash"
+                                            >
+                                                {{ item.name }}
                                             </Option>
                                         </Select>
                                     </div>

@@ -14,21 +14,21 @@
  *
  */
 // external dependencies
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { Address, NetworkType, PublicAccount, RepositoryFactory } from 'symbol-sdk';
-// internal dependencies
-import { AddressValidator, PublicKeyValidator } from '@/core/validation/validators';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
+// @ts-ignore
+import ButtonAdd from '@/components/ButtonAdd/ButtonAdd.vue';
 // @ts-ignore
 import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
 // @ts-ignore
 import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ButtonAdd from '@/components/ButtonAdd/ButtonAdd.vue';
+import { ValidatedComponent } from '@/components/ValidatedComponent/ValidatedComponent';
 import { FilterHelpers } from '@/core/utils/FilterHelpers';
+// internal dependencies
+import { AddressValidator, PublicKeyValidator } from '@/core/validation/validators';
+import { Address, NetworkType, PublicAccount } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -40,25 +40,11 @@ import { FilterHelpers } from '@/core/utils/FilterHelpers';
     },
     computed: {
         ...mapGetters({
-            repositoryFactory: 'network/repositoryFactory',
             networkType: 'network/networkType',
         }),
     },
 })
-export class AddCosignatoryInputTs extends Vue {
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
-
-    /**
-     * Current peer
-     * @private
-     * @type {string}
-     */
-    private repositoryFactory: RepositoryFactory;
-
+export class AddCosignatoryInputTs extends ValidatedComponent {
     /**
      * Current network type
      * @private

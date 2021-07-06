@@ -13,49 +13,47 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { Address, Account, NetworkType, CosignatureTransaction, AggregateTransaction } from 'symbol-sdk';
-import { Component, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-// internal dependencies
-import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
-import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
-// child components
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
+// @ts-ignore
+import AccountSignerSelector from '@/components/AccountSignerSelector/AccountSignerSelector.vue';
+// @ts-ignore
+import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
+// @ts-ignore
+import FormRow from '@/components/FormRow/FormRow.vue';
 // @ts-ignore
 import FormWrapper from '@/components/FormWrapper/FormWrapper.vue';
+// @ts-ignore
+import HardwareConfirmationButton from '@/components/HardwareConfirmationButton/HardwareConfirmationButton.vue';
+// @ts-ignore
+import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+// @ts-ignore
+import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
 // @ts-ignore
 import MessageInput from '@/components/MessageInput/MessageInput.vue';
 // @ts-ignore
 import RecipientInput from '@/components/RecipientInput/RecipientInput.vue';
 // @ts-ignore
 import SignerSelector from '@/components/SignerSelector/SignerSelector.vue';
-// @ts-ignore
-import MaxFeeAndSubmit from '@/components/MaxFeeAndSubmit/MaxFeeAndSubmit.vue';
-// @ts-ignore
-import FormRow from '@/components/FormRow/FormRow.vue';
-// @ts-ignore
-import ErrorTooltip from '@/components/ErrorTooltip/ErrorTooltip.vue';
-// @ts-ignore
-import LanguageSelector from '@/components/LanguageSelector/LanguageSelector.vue';
+// internal dependencies
+import { AccountModel, AccountType } from '@/core/database/entities/AccountModel';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
-import { ProfileService } from '@/services/ProfileService';
-import { AccountService } from '@/services/AccountService';
-import { ValidationRuleset } from '@/core/validation/ValidationRuleset';
-import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
 import { SettingsModel } from '@/core/database/entities/SettingsModel';
+import { AccountService } from '@/services/AccountService';
+import { LedgerService } from '@/services/LedgerService';
+import { ProfileService } from '@/services/ProfileService';
 import { SettingService } from '@/services/SettingService';
-// @ts-ignore
-import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue';
-// @ts-ignore
-import HardwareConfirmationButton from '@/components/HardwareConfirmationButton/HardwareConfirmationButton.vue';
+import { AccountTransactionSigner, TransactionSigner } from '@/services/TransactionAnnouncerService';
 // @ts-ignore
 import FormProfileUnlock from '@/views/forms/FormProfileUnlock/FormProfileUnlock.vue';
-
-import { AccountTransactionSigner, TransactionSigner } from '@/services/TransactionAnnouncerService';
-import { LedgerService } from '@/services/LedgerService';
+import { FormTransactionBase } from '@/views/forms/FormTransactionBase/FormTransactionBase';
 // @ts-ignore
-import AccountSignerSelector from '@/components/AccountSignerSelector/AccountSignerSelector.vue';
+import FormTransferTransaction from '@/views/forms/FormTransferTransaction/FormTransferTransaction.vue';
 import _ from 'lodash';
+import { Account, Address, AggregateTransaction, CosignatureTransaction } from 'symbol-sdk';
+// child components
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { Component, Prop } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -78,6 +76,7 @@ import _ from 'lodash';
         ...mapGetters({
             currentProfile: 'profile/currentProfile',
             isAuthenticated: 'profile/isAuthenticated',
+            allNetworkModels: 'network/allNetworkModels',
         }),
     },
 })
@@ -93,8 +92,8 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
     /**
      * Profiles indexed by network type
      */
-    private profilesClassifiedByNetworkType: {
-        networkType: NetworkType;
+    private profilesClassifiedByGenerationHash: {
+        generationHash: string;
         profiles: ProfileModel[];
     }[];
 
@@ -113,11 +112,7 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
 
     public accountService = new AccountService();
 
-    /**
-     * Validation rules
-     * @var {ValidationRuleset}
-     */
-    public validationRules = ValidationRuleset;
+    public allNetworkModels: Record<string, NetworkModel>;
 
     /**
      * Form items
@@ -140,9 +135,9 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
             return;
         }
 
-        const profilesGroupedByNetworkType = _.groupBy(this.profiles, (p) => p.networkType);
-        this.profilesClassifiedByNetworkType = Object.values(profilesGroupedByNetworkType).map((profiles) => ({
-            networkType: profiles[0].networkType,
+        const profilesGroupedByGenerationHash = _.groupBy(this.profiles, (p) => p.generationHash);
+        this.profilesClassifiedByGenerationHash = Object.values(profilesGroupedByGenerationHash).map((profiles) => ({
+            generationHash: profiles[0].generationHash,
             profiles: profiles,
         }));
 
@@ -153,11 +148,11 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
 
     /**
      * Getter for network type label
-     * @param {NetworkType} networkType
+     * @param generationHash
      * @return {string}
      */
-    public getNetworkTypeLabel(networkType: NetworkType): string {
-        return NetworkTypeHelper.getNetworkTypeLabel(networkType);
+    public getGenerationHashLabel(generationHash: string): string {
+        return this.allNetworkModels[generationHash]?.name || 'Loading...';
     }
 
     public async onProfileNameChange() {
@@ -170,8 +165,7 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
 
         const settingService = new SettingService();
 
-        const settings: SettingsModel = settingService.getProfileSettings(currentProfileName, profile.networkType);
-
+        const settings: SettingsModel = settingService.getProfileSettings(currentProfileName, this.networkModel);
         const knownAccounts: AccountModel[] = this.accountService.getKnownAccounts(profile.accounts);
 
         if (knownAccounts.length == 0) {
@@ -190,7 +184,7 @@ export class FormOfflineCosignTransactionTs extends FormTransactionBase {
         }
 
         await this.$store.dispatch('profile/SET_CURRENT_PROFILE', profile);
-        await this.$store.dispatch('network/CONNECT', { networkType: profile.networkType, isOffline: true });
+        await this.$store.dispatch('network/CONNECT', { isOffline: true });
         this.$store.dispatch('account/SET_KNOWN_ACCOUNTS', profile.accounts);
         await this.$store.dispatch('account/SET_CURRENT_ACCOUNT', defaultAccount);
         this.$store.dispatch('diagnostic/ADD_DEBUG', 'Profile login successful with currentProfileName: ' + currentProfileName);

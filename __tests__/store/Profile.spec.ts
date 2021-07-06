@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
+import { defaultMainnetNetworkConfig } from '@/config';
 import { ProfileModel } from '@/core/database/entities/ProfileModel';
 import ProfileStore from '@/store/Profile';
 import flushPromises from 'flush-promises';
-import { NetworkType } from 'symbol-sdk';
 
 describe('store/Profile', () => {
     describe('action "RESET_STATE" should', () => {
@@ -59,9 +59,14 @@ describe('store/Profile', () => {
             // prepare
             const commit = jest.fn();
             const dispatch = jest.fn();
-            const model = { networkType: NetworkType.TEST_NET } as ProfileModel;
+            const rootGetters = {
+                'network/allNetworkModels': {
+                    [defaultMainnetNetworkConfig.generationHash]: defaultMainnetNetworkConfig,
+                },
+            };
+            const model = { generationHash: defaultMainnetNetworkConfig.generationHash } as ProfileModel;
             // act
-            await ProfileStore.actions.SET_CURRENT_PROFILE({ commit, dispatch }, model);
+            await ProfileStore.actions.SET_CURRENT_PROFILE({ commit, dispatch, rootGetters }, model);
 
             // assert
             expect(commit).toHaveBeenCalledTimes(2);

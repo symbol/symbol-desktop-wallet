@@ -14,11 +14,10 @@
  *
  */
 
-import { NetworkConfiguration, NetworkType } from 'symbol-sdk';
+import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfigurationModel';
 import { Formatters } from '@/core/utils/Formatters';
 import { TimeHelpers } from '@/core/utils/TimeHelpers';
-
-import { networkConfig } from '@/config';
+import { NetworkConfiguration } from 'symbol-sdk';
 
 /**
  * Helper class that retrieves properties from the SDK's NetworkConfiguration object when
@@ -33,12 +32,11 @@ import { networkConfig } from '@/config';
  */
 export class NetworkConfigurationHelpers {
     /**
-     * This are the absolute defaults if the network is down and the configuration hasn't been cached
-     * in the local storage.
+     * @param defaults the defaults if the provided configuration is incomplete.
      */
-    private static defaults = networkConfig[NetworkType.TEST_NET].networkConfigurationDefaults;
+    constructor(private readonly defaults: NetworkConfigurationModel | undefined) {}
 
-    public static maxMosaicDivisibility(
+    public maxMosaicDivisibility(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -48,25 +46,22 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.mosaic &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.mosaic.maxMosaicDivisibility)) ||
             defaultValue ||
-            this.defaults.maxMosaicDivisibility
+            this.getDefaults().maxMosaicDivisibility
         );
     }
 
-    public static maxNamespaceDepth(
-        networkConfiguration: NetworkConfiguration | undefined,
-        defaultValue: number | undefined = undefined,
-    ): number {
+    public maxNamespaceDepth(networkConfiguration: NetworkConfiguration | undefined, defaultValue: number | undefined = undefined): number {
         return (
             (networkConfiguration &&
                 networkConfiguration.plugins &&
                 networkConfiguration.plugins.namespace &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.namespace.maxNamespaceDepth)) ||
             defaultValue ||
-            this.defaults.maxNamespaceDepth
+            this.getDefaults().maxNamespaceDepth
         );
     }
 
-    public static namespaceGracePeriodDuration(
+    public namespaceGracePeriodDuration(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -76,11 +71,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.namespace &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.plugins.namespace.namespaceGracePeriodDuration)) ||
             defaultValue ||
-            this.defaults.namespaceGracePeriodDuration
+            this.getDefaults().namespaceGracePeriodDuration
         );
     }
 
-    public static maxCosignatoriesPerAccount(
+    public maxCosignatoriesPerAccount(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -90,11 +85,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.multisig &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.multisig.maxCosignatoriesPerAccount)) ||
             defaultValue ||
-            this.defaults.maxCosignatoriesPerAccount
+            this.getDefaults().maxCosignatoriesPerAccount
         );
     }
 
-    public static blockGenerationTargetTime(
+    public blockGenerationTargetTime(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -103,11 +98,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.chain &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.chain.blockGenerationTargetTime)) ||
             defaultValue ||
-            this.defaults.blockGenerationTargetTime
+            this.getDefaults().blockGenerationTargetTime
         );
     }
 
-    public static lockedFundsPerAggregate(
+    public lockedFundsPerAggregate(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: string | undefined = undefined,
     ): string {
@@ -117,39 +112,33 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.lockhash &&
                 Formatters.configurationNumberAsString(networkConfiguration.plugins.lockhash.lockedFundsPerAggregate)) ||
             defaultValue ||
-            this.defaults.lockedFundsPerAggregate
+            this.getDefaults().lockedFundsPerAggregate
         );
     }
 
-    public static maxMosaicDuration(
-        networkConfiguration: NetworkConfiguration | undefined,
-        defaultValue: number | undefined = undefined,
-    ): number {
+    public maxMosaicDuration(networkConfiguration: NetworkConfiguration | undefined, defaultValue: number | undefined = undefined): number {
         return (
             (networkConfiguration &&
                 networkConfiguration.plugins &&
                 networkConfiguration.plugins.mosaic &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.plugins.mosaic.maxMosaicDuration)) ||
             defaultValue ||
-            this.defaults.maxMosaicDuration
+            this.getDefaults().maxMosaicDuration
         );
     }
 
-    public static epochAdjustment(
-        networkConfiguration: NetworkConfiguration | undefined,
-        defaultValue: number | undefined = undefined,
-    ): number {
+    public epochAdjustment(networkConfiguration: NetworkConfiguration | undefined, defaultValue: number | undefined = undefined): number {
         return (
             (networkConfiguration &&
                 networkConfiguration.plugins &&
                 networkConfiguration.plugins.mosaic &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.network.epochAdjustment)) ||
             defaultValue ||
-            this.defaults.epochAdjustment
+            this.getDefaults().epochAdjustment
         );
     }
 
-    public static minNamespaceDuration(
+    public minNamespaceDuration(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -159,11 +148,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.namespace &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.plugins.namespace.minNamespaceDuration)) ||
             defaultValue ||
-            this.defaults.minNamespaceDuration
+            this.getDefaults().minNamespaceDuration
         );
     }
 
-    public static maxNamespaceDuration(
+    public maxNamespaceDuration(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -173,11 +162,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.namespace &&
                 TimeHelpers.durationStringToSeconds(networkConfiguration.plugins.namespace.maxNamespaceDuration)) ||
             defaultValue ||
-            this.defaults.maxNamespaceDuration
+            this.getDefaults().maxNamespaceDuration
         );
     }
 
-    public static maxTransactionsPerAggregate(
+    public maxTransactionsPerAggregate(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -187,11 +176,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.aggregate &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.aggregate.maxTransactionsPerAggregate)) ||
             defaultValue ||
-            this.defaults.maxTransactionsPerAggregate
+            this.getDefaults().maxTransactionsPerAggregate
         );
     }
 
-    public static maxCosignedAccountsPerAccount(
+    public maxCosignedAccountsPerAccount(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -201,25 +190,22 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.plugins.multisig &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.multisig.maxCosignedAccountsPerAccount)) ||
             defaultValue ||
-            this.defaults.maxCosignedAccountsPerAccount
+            this.getDefaults().maxCosignedAccountsPerAccount
         );
     }
 
-    public static maxMessageSize(
-        networkConfiguration: NetworkConfiguration | undefined,
-        defaultValue: number | undefined = undefined,
-    ): number {
+    public maxMessageSize(networkConfiguration: NetworkConfiguration | undefined, defaultValue: number | undefined = undefined): number {
         return (
             (networkConfiguration &&
                 networkConfiguration.plugins &&
                 networkConfiguration.plugins.transfer &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.plugins.transfer.maxMessageSize)) ||
             defaultValue ||
-            this.defaults.maxMessageSize
+            this.getDefaults().maxMessageSize
         );
     }
 
-    public static maxMosaicAtomicUnits(
+    public maxMosaicAtomicUnits(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -228,24 +214,21 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.chain &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.chain.maxMosaicAtomicUnits)) ||
             defaultValue ||
-            this.defaults.maxMosaicAtomicUnits
+            this.getDefaults().maxMosaicAtomicUnits
         );
     }
 
-    public static currencyMosaicId(
-        networkConfiguration: NetworkConfiguration | undefined,
-        defaultValue: string | undefined = undefined,
-    ): string {
+    public currencyMosaicId(networkConfiguration: NetworkConfiguration | undefined, defaultValue: string | undefined = undefined): string {
         return (
             (networkConfiguration &&
                 networkConfiguration.chain &&
                 Formatters.configurationStringAsString(networkConfiguration.chain.currencyMosaicId)) ||
             defaultValue ||
-            this.defaults.currencyMosaicId
+            this.getDefaults().currencyMosaicId
         );
     }
 
-    public static harvestingMosaicId(
+    public harvestingMosaicId(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: string | undefined = undefined,
     ): string {
@@ -254,11 +237,11 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.chain &&
                 Formatters.configurationStringAsString(networkConfiguration.chain.harvestingMosaicId)) ||
             defaultValue ||
-            this.defaults.harvestingMosaicId
+            this.getDefaults().harvestingMosaicId
         );
     }
 
-    public static defaultDynamicFeeMultiplier(
+    public defaultDynamicFeeMultiplier(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
@@ -267,18 +250,25 @@ export class NetworkConfigurationHelpers {
                 networkConfiguration.chain &&
                 Formatters.configurationNumberAsNumber(networkConfiguration.chain.defaultDynamicFeeMultiplier)) ||
             defaultValue ||
-            this.defaults.defaultDynamicFeeMultiplier
+            this.getDefaults().defaultDynamicFeeMultiplier
         );
     }
 
-    public static totalChainImportance(
+    public totalChainImportance(
         networkConfiguration: NetworkConfiguration | undefined,
         defaultValue: number | undefined = undefined,
     ): number {
         return (
             (networkConfiguration?.chain && Formatters.configurationNumberAsNumber(networkConfiguration.chain.totalChainImportance)) ||
             defaultValue ||
-            this.defaults.totalChainImportance
+            this.getDefaults().totalChainImportance
         );
+    }
+
+    private getDefaults(): NetworkConfigurationModel {
+        if (!this.defaults) {
+            throw new Error('Network default could not be loaded!!!');
+        }
+        return this.defaults;
     }
 }

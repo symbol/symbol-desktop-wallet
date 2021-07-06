@@ -16,8 +16,6 @@
 
 import { VersionedObjectStorage } from '@/core/database/backends/VersionedObjectStorage';
 import { SettingsModel } from '@/core/database/entities/SettingsModel';
-import { networkConfig } from '@/config';
-import { NetworkType } from 'symbol-sdk';
 
 export class SettingsModelStorage extends VersionedObjectStorage<Record<string, SettingsModel>> {
     /**
@@ -30,46 +28,19 @@ export class SettingsModelStorage extends VersionedObjectStorage<Record<string, 
             storageKey: 'settings',
             migrations: [
                 {
-                    description: 'Update settings to 0.9.5.1 network',
+                    description: 'Reset settings to 0.9.5.1 network',
                     migrate: () => undefined,
                 },
                 {
-                    description: 'Update settings for 0.9.6.3 network (address changes)',
-                    migrate: (from: any) => {
-                        // update all pre-0.9.6.x settings
-                        const profiles = Object.keys(from);
-
-                        const modified: any = from;
-                        profiles.map((name: string) => {
-                            modified[name] = {
-                                ...modified[name],
-                                explorerUrl: networkConfig[NetworkType.TEST_NET].explorerUrl,
-                            };
-                        });
-
-                        return modified;
-                    },
+                    description: 'Reset settings for 0.9.6.3 network',
+                    migrate: () => undefined,
                 },
                 {
-                    description: 'Update settings for 0.10.x network (address changes)',
-                    migrate: (from: any) => {
-                        // update all pre-0.10.x settings
-                        const settings = Object.keys(from);
-
-                        const modified: any = from;
-                        settings.map((name: string) => {
-                            modified[name] = {
-                                ...modified[name],
-                                explorerUrl: networkConfig[NetworkType.TEST_NET].explorerUrl,
-                                faucetUrl: networkConfig[NetworkType.TEST_NET].faucetUrl,
-                            };
-                        });
-
-                        return modified;
-                    },
+                    description: 'Reset settings for 0.10.x network',
+                    migrate: () => undefined,
                 },
                 {
-                    description: 'Update profiles for 0.10.0.5 pre main network release (non backwards compatible on protocol v0.10.0.4)',
+                    description: 'Reset profiles for 0.10.0.5 pre main network release',
                     migrate: () => undefined,
                 },
                 {
@@ -77,7 +48,7 @@ export class SettingsModelStorage extends VersionedObjectStorage<Record<string, 
                     migrate: () => undefined,
                 },
                 {
-                    description: 'Reset for Symbol mainet launch.',
+                    description: 'Reset for Symbol mainnet launch.',
                     migrate: () => undefined,
                 },
                 {

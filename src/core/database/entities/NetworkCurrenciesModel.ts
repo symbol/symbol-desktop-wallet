@@ -16,6 +16,14 @@
 
 import { NetworkCurrencyModel } from '@/core/database/entities/NetworkCurrencyModel';
 
+/**
+ * The model storing the known network currencies.
+ */
 export class NetworkCurrenciesModel {
-    constructor(public networkCurrency: NetworkCurrencyModel, public harvestCurrency: NetworkCurrencyModel) {}
+    /**
+     *
+     * @param networkCurrency the network main currency, example symbol.xym
+     * @param harvestCurrency or undefined if the harvest currency is the network currency.
+     */
+    constructor(public networkCurrency: NetworkCurrencyModel, public harvestCurrency?: NetworkCurrencyModel) {}
 }

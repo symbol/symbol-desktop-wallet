@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { mapGetters } from 'vuex';
-
-// @ts-ignore
-import FormOfflineTransferTransaction from '@/views/forms/FormOfflineTransferTransaction/FormOfflineTransferTransaction.vue';
 // @ts-ignore
 import QRCodeDisplay from '@/components/QRCode/QRCodeDisplay/QRCodeDisplay.vue';
 // @ts-ignore
-import ModalImportQR from '@/views/modals/ModalImportQR/ModalImportQR.vue';
+import TransactionDetails from '@/components/TransactionDetails/TransactionDetails.vue';
+import { getNetworkConfigs } from '@/config';
 // @ts-ignore
 import FormOfflineCosignTransaction from '@/views/forms/FormOfflineCosignTransaction/FormOfflineCosignTransaction.vue';
 // @ts-ignore
-import ModalTransactionDetails from '@/views/modals/ModalTransactionDetails/ModalTransactionDetails.vue';
+import FormOfflineTransferTransaction from '@/views/forms/FormOfflineTransferTransaction/FormOfflineTransferTransaction.vue';
 // @ts-ignore
-import TransactionDetails from '@/components/TransactionDetails/TransactionDetails.vue';
-
-import { AggregateTransaction, Convert, CosignatureSignedTransaction, NetworkType, Transaction, TransactionMapping } from 'symbol-sdk';
-import { QRCode, CosignatureQR, CosignatureSignedTransactionQR } from 'symbol-qr-library';
-import { OfflineGenerationHash } from '@/services/offline/MockModels';
+import ModalImportQR from '@/views/modals/ModalImportQR/ModalImportQR.vue';
+// @ts-ignore
+import ModalTransactionDetails from '@/views/modals/ModalTransactionDetails/ModalTransactionDetails.vue';
 import _ from 'lodash';
+import { CosignatureQR, CosignatureSignedTransactionQR, QRCode } from 'symbol-qr-library';
+import { AggregateTransaction, Convert, CosignatureSignedTransaction, NetworkType, Transaction, TransactionMapping } from 'symbol-sdk';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
@@ -122,11 +120,15 @@ export default class OfflineCosignTransactionTs extends Vue {
             }
         }
         if (transaction) {
+            const networkConfig = getNetworkConfigs().find((config) => config.networkType === transaction.networkType);
+            if (!networkConfig) {
+                throw new Error(`There is no network configuration for network type ${transaction.networkType}`);
+            }
             const hash = Transaction.createTransactionHash(
                 transaction.serialize(),
-                Array.from(Convert.hexToUint8(OfflineGenerationHash[transaction.networkType])),
+                Array.from(Convert.hexToUint8(networkConfig.generationHash)),
             );
-            await this.$store.dispatch('network/CONNECT', { networkType: transaction.networkType, isOffline: true });
+            await this.$store.dispatch('network/CONNECT', { isOffline: true });
             this.aggregateTransactionView = _.cloneDeep(transaction);
             this.transactionDetailsVisible = true;
             // @ts-ignore

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
+import { MosaicService } from '@/services/MosaicService';
+import { of } from 'rxjs';
 import {
     AccountInfo,
     AccountRepository,
@@ -27,8 +29,6 @@ import {
     RepositoryFactory,
     UInt64,
 } from 'symbol-sdk';
-import { MosaicService } from '@/services/MosaicService';
-import { of } from 'rxjs';
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito';
 
 const fakeMosaicInfo = new MosaicInfo(
@@ -91,7 +91,7 @@ const repositoryFactory = instance(mockRepoFactory);
 describe('services/MosaicService', () => {
     test('getMosaics all addresses', async () => {
         const generationHash = await repositoryFactory.getGenerationHash().toPromise();
-        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory, generationHash).toPromise();
+        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory).toPromise();
         const addresses: Address[] = [address1, address2, address3, address4, address5];
         const accountInfos = await repositoryFactory.createAccountRepository().getAccountsInfo(addresses).toPromise();
         const result = await mosaicService
@@ -102,7 +102,7 @@ describe('services/MosaicService', () => {
 
     test('getMosaics account 1 addresses', async () => {
         const generationHash = await repositoryFactory.getGenerationHash().toPromise();
-        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory, generationHash).toPromise();
+        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory).toPromise();
         const addresses: Address[] = [address1];
         const accountInfos = await repositoryFactory.createAccountRepository().getAccountsInfo(addresses).toPromise();
         const result = await mosaicService
@@ -113,7 +113,7 @@ describe('services/MosaicService', () => {
 
     test('getMosaics account 3 addresses', async () => {
         const generationHash = await repositoryFactory.getGenerationHash().toPromise();
-        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory, generationHash).toPromise();
+        const { networkCurrency } = await mosaicService.getNetworkCurrencies(repositoryFactory).toPromise();
         const addresses: Address[] = [address3];
         const accountInfos = await repositoryFactory.createAccountRepository().getAccountsInfo(addresses).toPromise();
         const result = await mosaicService

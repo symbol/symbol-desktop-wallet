@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and limitations under the License.
  *
  */
-import { NetworkType, RepositoryFactory } from 'symbol-sdk';
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { NetworkModel } from '@/core/database/entities/NetworkModel';
 import { NodeModel } from '@/core/database/entities/NodeModel';
-import { NetworkTypeHelper } from '@/core/utils/NetworkTypeHelper';
-import * as _ from 'lodash';
 //@ts-ignore
 import ModalNetworkNotMatchingProfile from '@/views/modals/ModalNetworkNotMatchingProfile/ModalNetworkNotMatchingProfile.vue';
+import * as _ from 'lodash';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: { ModalNetworkNotMatchingProfile },
@@ -28,9 +27,7 @@ import ModalNetworkNotMatchingProfile from '@/views/modals/ModalNetworkNotMatchi
         ...mapGetters({
             currentPeerInfo: 'network/currentPeerInfo',
             isConnected: 'network/isConnected',
-            networkType: 'network/networkType',
-            repositoryFactory: 'network/repositoryFactory',
-            generationHash: 'network/generationHash',
+            networkModel: 'network/networkModel',
             knowNodes: 'network/knowNodes',
             networkIsNotMatchingProfile: 'network/networkIsNotMatchingProfile',
         }),
@@ -53,18 +50,11 @@ export class PeerSelectorTs extends Vue {
     public isConnected: boolean;
 
     /**
-     * Current networkType
+     * Current networkModel
      * @see {Store.Network}
-     * @var {NetworkType}
+     * @var {NetworkModel}
      */
-    public networkType: NetworkType;
-
-    /**
-     * Current generationHash
-     * @see {Store.Network}
-     * @var {string}
-     */
-    public generationHash: string;
+    public networkModel: NetworkModel;
 
     /**
      * Known peers
@@ -72,8 +62,6 @@ export class PeerSelectorTs extends Vue {
      * @var {string[]}
      */
     public knowNodes: NodeModel[];
-
-    public repositoryFactory: RepositoryFactory;
 
     public poptipVisible: boolean = false;
 
@@ -86,11 +74,11 @@ export class PeerSelectorTs extends Vue {
         );
     }
 
-    get networkTypeText(): string {
+    get networkText(): string {
         if (!this.isConnected) {
             return this.$t('invalid_node').toString();
         }
-        return !!this.networkType ? NetworkTypeHelper.getNetworkTypeLabel(this.networkType) : this.$t('loading').toString();
+        return !!this.networkModel ? this.networkModel.name : this.$t('loading').toString();
     }
 
     /// end-region computed properties getter/setter
