@@ -295,7 +295,7 @@ export class FormPersistentDelegationRequestTransactionTs extends FormTransactio
     /**
      * To get singleKeyTransaction
      */
-    protected getSingleKeyLinkTransaction(type?: string): Observable<Transaction[]> {
+    protected getSingleKeyLinkTransaction(type?: string, transactionSigner = this.tempTransactionSigner): Observable<Transaction[]> {
         const maxFee = UInt64.fromUint(this.formItems.maxFee) || UInt64.fromUint(this.feesConfig.fast);
 
         let transaction: Transaction;
@@ -331,7 +331,7 @@ export class FormPersistentDelegationRequestTransactionTs extends FormTransactio
                 break;
         }
         return this.isMultisigMode()
-            ? this.toMultiSigAggregate([transaction], maxFee, this.tempTransactionSigner)
+            ? this.toMultiSigAggregate([transaction], maxFee, transactionSigner)
             : of([this.calculateSuggestedMaxFee(transaction)]);
     }
     /**
@@ -514,7 +514,7 @@ export class FormPersistentDelegationRequestTransactionTs extends FormTransactio
                 ),
             );
         } else if (this.action === HarvestingAction.SINGLE_KEY) {
-            return this.getSingleKeyLinkTransaction(this.type).pipe(
+            return this.getSingleKeyLinkTransaction(this.type, transactionSigner).pipe(
                 flatMap((transactions) => {
                     const signedTransactions = transactions.map((t) => transactionSigner.signTransaction(t, this.generationHash));
                     if (!signedTransactions.length) {
