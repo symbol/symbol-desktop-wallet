@@ -19,7 +19,7 @@
                 <PaidFeeDisplay :transaction="item.value" />
             </span>
             <span v-else-if="item.isAddress">
-                <AddressDisplay :address="item.value" />
+                <AddressDisplay :address="item.value" :show-address="true" />
             </span>
             <span v-else-if="item.isMessage">
                 <MessageDisplay

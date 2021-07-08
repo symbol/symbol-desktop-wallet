@@ -149,6 +149,7 @@ export default {
             const linkedAddress = await getLinkedAccountPromise;
 
             commit('linkedAddress', linkedAddress);
+            return linkedAddress;
         },
 
         SIGNER_CHANGED({ commit, rootGetters, getters }) {

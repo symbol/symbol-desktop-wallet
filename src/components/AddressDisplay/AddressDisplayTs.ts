@@ -23,6 +23,11 @@ export class AddressDisplayTs extends Vue {
     })
     address: Address | NamespaceId;
 
+    @Prop({
+        default: false,
+    })
+    showAddress: boolean;
+
     /**
      * Action descriptor
      * @var {string}
@@ -53,7 +58,9 @@ export class AddressDisplayTs extends Vue {
             this.descriptor = contact ? contact.name : this.address.pretty();
         } else if (this.address instanceof NamespaceId) {
             this.descriptor = this.address.toHex();
-            this.descriptor = await this.$store.dispatch('namespace/RESOLVE_NAME', this.address);
+            const namespaceName = await this.$store.dispatch('namespace/RESOLVE_NAME', this.address);
+            const linkedAddress = await this.$store.dispatch('namespace/GET_LINKED_ADDRESS', this.address);
+            this.descriptor = linkedAddress && this.showAddress ? `${namespaceName} (${linkedAddress.pretty()})` : namespaceName;
         }
     }
 }
