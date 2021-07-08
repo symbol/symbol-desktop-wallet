@@ -196,5 +196,11 @@
     "linux": {
         "category": "Finance",
         "icon": "./assets/icons/Icon.incs"
+    },
+    "deb": {
+        "depends": [
+            "libappindicator3-1",
+            "libindicator3-7"
+        ]
     }
 }
