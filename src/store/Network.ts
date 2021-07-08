@@ -40,6 +40,8 @@ import {
     RepositoryFactory,
     RepositoryFactoryHttp,
     TransactionFees,
+    DeadlineService,
+    Deadline,
 } from 'symbol-sdk';
 import Vue from 'vue';
 // internal dependencies
@@ -95,6 +97,9 @@ interface NetworkState {
     connectingToNodeInfo: ConnectingToNodeInfo;
     isOfflineMode: boolean;
     feesConfig: any;
+    simpleTransactionDeadline: Deadline;
+    aggregateTransactionDeadline: Deadline;
+    hashLockTransactionDeadline: Deadline;
 }
 
 const initialNetworkState: NetworkState = {
@@ -119,6 +124,9 @@ const initialNetworkState: NetworkState = {
     connectingToNodeInfo: undefined,
     isOfflineMode: false,
     feesConfig: undefined,
+    simpleTransactionDeadline: undefined,
+    aggregateTransactionDeadline: undefined,
+    hashLockTransactionDeadline: undefined,
 };
 
 export default {
@@ -146,6 +154,9 @@ export default {
         connectingToNodeInfo: (state: NetworkState) => state.connectingToNodeInfo,
         isOfflineMode: (state: NetworkState) => state.isOfflineMode,
         feesConfig: (state: NetworkState) => state.feesConfig,
+        simpleTransactionDeadline: (state: NetworkState) => state.simpleTransactionDeadline,
+        aggregateTransactionDeadline: (state: NetworkState) => state.aggregateTransactionDeadline,
+        hashLockTransactionDeadline: (state: NetworkState) => state.hashLockTransactionDeadline,
     },
     mutations: {
         setInitialized: (state: NetworkState, initialized: boolean) => {
@@ -221,6 +232,15 @@ export default {
         setFeesConfig: (state: NetworkState, feesConfig: {}) => {
             Vue.set(state, 'feesConfig', feesConfig);
         },
+        simpleTransactionDeadline: (state: NetworkState, simpleTransactionDeadline: Deadline) => {
+            Vue.set(state, 'simpleTransactionDeadline', simpleTransactionDeadline);
+        },
+        aggregateTransactionDeadline: (state: NetworkState, aggregateTransactionDeadline: Deadline) => {
+            Vue.set(state, 'aggregateTransactionDeadline', aggregateTransactionDeadline);
+        },
+        hashLockTransactionDeadline: (state: NetworkState, hashLockTransactionDeadline: Deadline) => {
+            Vue.set(state, 'hashLockTransactionDeadline', hashLockTransactionDeadline);
+        },
     },
     actions: {
         async initialize({ commit, getters }) {
@@ -255,6 +275,9 @@ export default {
             commit('setConnected', false);
             commit('connectingToNodeInfo', undefined);
             commit('setFeesConfig', undefined);
+            commit('simpleTransactionDeadline', undefined);
+            commit('hashLockTransactionDeadline', undefined);
+            commit('aggregateTransactionDeadline', undefined);
         },
 
         async CONNECT(
@@ -537,6 +560,27 @@ export default {
             const nodeRepository = repositoryFactory.createNodeRepository();
             const peerNodes: NodeInfo[] = await nodeRepository.getNodePeers().toPromise();
             commit('peerNodes', _.uniqBy(peerNodes, 'host'));
+        },
+        async SET_TRANSACTION_DEADLINE({ commit, getters }, deadlineInHours = 2) {
+            const repositoryFactory: RepositoryFactory = getters['repositoryFactory'] as RepositoryFactory;
+            const deadline = await (await DeadlineService.create(repositoryFactory)).createDeadlineUsingServerTime(deadlineInHours);
+            switch (deadlineInHours) {
+                case 2:
+                    commit('simpleTransactionDeadline', deadline);
+                    break;
+                case 6:
+                    commit('hashLockTransactionDeadline', deadline);
+                    break;
+                case 48 || 24:
+                    commit('aggregateTransactionDeadline', deadline);
+                    break;
+                case 0:
+                    commit('simpleTransactionDeadline', undefined);
+                    commit('hashLockTransactionDeadline', undefined);
+                    commit('aggregateTransactionDeadline', undefined);
+                    break;
+            }
+            return deadline;
         },
         // TODO :: re-apply that behavior if red screen issue fixed
         // load nodes that eligible for delegate harvesting

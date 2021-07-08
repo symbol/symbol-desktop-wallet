@@ -28,6 +28,7 @@ import {
     Account,
     PublicAccount,
     SignedTransaction,
+    Deadline,
 } from 'symbol-sdk';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -344,6 +345,12 @@ export class FormTransferTransactionTs extends FormTransactionBase {
      * @return {TransferTransaction[]}
      */
     protected getTransactions(): TransferTransaction[] {
+        let deadline: Deadline;
+        if (this.$route.fullPath.indexOf('offline') !== -1) {
+            deadline = this.createOfflineDeadline();
+        } else {
+            deadline = !this.isMultisigMode() ? this.simpleTransactionDeadline : this.aggregateTransactionDeadline;
+        }
         const mosaicsInfo = this.$store.getters['mosaic/mosaics'] as MosaicModel[];
 
         // Push network currency info for offline transaction format amount to absolute
@@ -370,7 +377,7 @@ export class FormTransferTransactionTs extends FormTransactionBase {
             );
         return [
             TransferTransaction.create(
-                this.createDeadline(),
+                deadline,
                 this.instantiatedRecipient,
                 mosaics.length ? mosaics : [],
                 this.formItems.encryptMessage ? this.encyptedMessage : PlainMessage.create(this.formItems.messagePlain || ''),
@@ -578,11 +585,16 @@ export class FormTransferTransactionTs extends FormTransactionBase {
     }
 
     triggerChange() {
-        if (AddressValidator.validate(this.formItems.recipientRaw)) {
+        this.isMultisigMode() ? this.createDeadline(48) && this.createDeadline(6) : this.createDeadline(2);
+        if (
+            AddressValidator.validate(this.formItems.recipientRaw) &&
+            ((!this.isMultisigMode() && this.simpleTransactionDeadline) ||
+                (this.isMultisigMode() && this.aggregateTransactionDeadline && this.hashLockTransactionDeadline))
+        ) {
             this.transactions = this.getTransactions();
-            this.transactionSize = this.transactions[0].size;
+            this.transactionSize = this.transactions && this.transactions[0].size;
             // avoid error
-            if (this.transactions) {
+            if (this.transactions && this.transactions[0].deadline) {
                 const data: ITransactionEntry[] = [];
                 this.transactions.map((item: TransferTransaction) => {
                     data.push({
@@ -801,5 +813,8 @@ export class FormTransferTransactionTs extends FormTransactionBase {
      */
     public onSignedOfflineTransaction(signedTransaction: SignedTransaction) {
         this.$emit('txSigned', signedTransaction);
+    }
+    protected createOfflineDeadline(deadlineInHours = 2): Deadline {
+        return Deadline.create(this.epochAdjustment, deadlineInHours);
     }
 }

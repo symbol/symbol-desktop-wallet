@@ -195,8 +195,10 @@ export class FormAggregateTransactionTs extends FormTransactionBase {
         const signer = PublicAccount.createFromPublicKey(tx['formItems']['signerPublicKey'], this.networkType);
         let t: TransferTransaction;
         if (signer.address.plain() !== this.currentAccount.address) {
+            this.createDeadline();
+            const deadline = this.simpleTransactionDeadline;
             t = TransferTransaction.create(
-                this.createDeadline(),
+                deadline,
                 this.instantiatedRecipient,
                 // @ts-ignore
                 !tx['formItems']['mosaics'].length ? [] : tx['formItems']['mosaics'],
@@ -209,8 +211,10 @@ export class FormAggregateTransactionTs extends FormTransactionBase {
                 signer,
             );
         } else {
+            this.createDeadline();
+            const deadline = this.simpleTransactionDeadline;
             t = TransferTransaction.create(
-                this.createDeadline(),
+                deadline,
                 this.instantiatedRecipient,
                 // @ts-ignore
                 !tx['formItems']['mosaics'].length ? [] : tx['formItems']['mosaics'],
@@ -236,8 +240,10 @@ export class FormAggregateTransactionTs extends FormTransactionBase {
         if (tx['formItems']['permanent'] == true) {
             tx['formItems']['duration'] == 0;
         }
+        this.createDeadline();
+        const deadline = this.simpleTransactionDeadline;
         return MosaicDefinitionTransaction.create(
-            this.createDeadline(),
+            deadline,
             randomNonce,
             mosaicId,
             MosaicFlags.create(tx['formItems']['supplyMutable'], tx['formItems']['transferable'], this['formItems']['restrictable']),
@@ -259,9 +265,10 @@ export class FormAggregateTransactionTs extends FormTransactionBase {
      */
     private CreateRootNameSpaceTx(tx: {}): NamespaceRegistrationTransaction {
         const maxFee = UInt64.fromUint(this.formItems.maxFee);
-
+        this.createDeadline();
+        const deadline = this.simpleTransactionDeadline;
         return NamespaceRegistrationTransaction.createRootNamespace(
-            this.createDeadline(),
+            deadline,
             tx['formItems']['newNamespaceName'],
             UInt64.fromUint(tx['formItems']['duration']),
             this.networkType,

@@ -152,22 +152,23 @@ export default {
                 .add(() => commit('isFetchingMetadata', false));
         },
 
-        async RESOLVE_METADATA_TRANSACTIONS({ commit, rootGetters }, metadataType: MetadataType) {
+        async RESOLVE_METADATA_TRANSACTIONS({ commit, rootGetters, dispatch }, metadataType: MetadataType) {
             const currentSignerAddress = rootGetters['account/currentSignerAddress'];
             const repositoryFactory = rootGetters['network/repositoryFactory'];
-            const epochAdjustment = rootGetters['network/epochAdjustment'];
             const networkType = rootGetters['network/networkType'];
             const metadataForm: MetadataFormState = rootGetters['metadata/metadataForm'];
 
             if (!currentSignerAddress) {
                 return;
             }
+            await dispatch('network/SET_TRANSACTION_DEADLINE', { root: true });
+            const deadline = rootGetters['network/simpleTransactionDeadline'] as Deadline;
 
             const metadataService = new MetadataService();
             const metadataTransaction = await metadataService
                 .metadataTransactionObserver(
                     repositoryFactory,
-                    Deadline.create(epochAdjustment),
+                    deadline,
                     networkType,
                     currentSignerAddress,
                     metadataForm.targetAddress,

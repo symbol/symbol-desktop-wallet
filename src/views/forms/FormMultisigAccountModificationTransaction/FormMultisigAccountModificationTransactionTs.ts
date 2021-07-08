@@ -150,9 +150,11 @@ export class FormMultisigAccountModificationTransactionTs extends FormTransactio
      * @return {MultisigAccountModificationTransaction[]}
      */
     protected getTransactions(): MultisigAccountModificationTransaction[] {
+        this.createDeadline();
+        const deadline = this.simpleTransactionDeadline;
         return [
             MultisigAccountModificationTransaction.create(
-                this.createDeadline(),
+                deadline,
                 this.formItems.minApprovalDelta,
                 this.formItems.minRemovalDelta,
                 this.addressAdditions,

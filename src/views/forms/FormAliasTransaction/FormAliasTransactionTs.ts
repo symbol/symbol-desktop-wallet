@@ -215,9 +215,11 @@ export class FormAliasTransactionTs extends FormTransactionBase {
         const namespaceId = new NamespaceId(this.formItems.namespaceFullName);
         const maxFee = UInt64.fromUint(this.formItems.maxFee);
         if (this.aliasTargetType === 'address') {
+            this.createDeadline();
+            const deadline = this.simpleTransactionDeadline;
             return [
                 AddressAliasTransaction.create(
-                    this.createDeadline(),
+                    deadline,
                     this.formItems.aliasAction,
                     namespaceId,
                     Address.createFromRawAddress(this.formItems.aliasTarget),
@@ -226,9 +228,11 @@ export class FormAliasTransactionTs extends FormTransactionBase {
                 ),
             ];
         } else {
+            this.createDeadline();
+            const deadline = this.simpleTransactionDeadline;
             return [
                 MosaicAliasTransaction.create(
-                    this.createDeadline(),
+                    deadline,
                     this.formItems.aliasAction,
                     namespaceId,
                     new MosaicId(this.formItems.aliasTarget),

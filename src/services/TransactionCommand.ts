@@ -34,6 +34,7 @@ import { Observable, of } from 'rxjs';
 import { AccountTransactionSigner, TransactionAnnouncerService, TransactionSigner } from '@/services/TransactionAnnouncerService';
 import { BroadcastResult } from '@/core/transactions/BroadcastResult';
 import { flatMap, map } from 'rxjs/operators';
+import { AppStore } from '@/app/AppStore';
 
 export enum TransactionCommandMode {
     SIMPLE = 'SIMPLE',
@@ -141,9 +142,11 @@ export class TransactionCommand {
         } else {
             const currentSigner = PublicAccount.createFromPublicKey(this.signerPublicKey, this.networkType);
             if (this.mode === TransactionCommandMode.AGGREGATE) {
+                this.createDeadline();
+                const aggregateDeadline = AppStore.getters['network/simpleTransactionDeadline'] as Deadline;
                 const aggregate = this.calculateSuggestedMaxFee(
                     AggregateTransaction.createComplete(
-                        Deadline.create(this.epochAdjustment),
+                        aggregateDeadline,
                         this.stageTransactions.map((t) => t.toAggregate(currentSigner)),
                         this.networkType,
                         [],
@@ -156,21 +159,18 @@ export class TransactionCommand {
                 const signedInnerTransactions = this.stageTransactions.map((t) => {
                     return t.signer === undefined ? t.toAggregate(currentSigner) : t.toAggregate(t.signer);
                 });
-
+                this.createDeadline(48);
+                const bondedDeadline = AppStore.getters['network/aggregateTransactionDeadline'] as Deadline;
                 const aggregate = this.calculateSuggestedMaxFee(
-                    AggregateTransaction.createBonded(
-                        Deadline.create(this.epochAdjustment, 48),
-                        signedInnerTransactions,
-                        this.networkType,
-                        [],
-                        maxFee,
-                    ),
+                    AggregateTransaction.createBonded(bondedDeadline, signedInnerTransactions, this.networkType, [], maxFee),
                 );
                 return account.signTransaction(aggregate, this.generationHash).pipe(
                     map((signedAggregateTransaction) => {
+                        this.createDeadline(6);
+                        const hashLockDeadline = AppStore.getters['network/hashLockTransactionDeadline'] as Deadline;
                         const hashLock = this.calculateSuggestedMaxFee(
                             LockFundsTransaction.create(
-                                Deadline.create(this.epochAdjustment, 6),
+                                hashLockDeadline,
                                 new Mosaic(this.networkMosaic, UInt64.fromNumericString(this.networkConfiguration.lockedFundsPerAggregate)),
                                 UInt64.fromUint(5760),
                                 signedAggregateTransaction,
@@ -186,6 +186,9 @@ export class TransactionCommand {
     }
 
     public calculateSuggestedMaxFee(transaction: Transaction): Transaction {
+        if (!transaction) {
+            return undefined;
+        }
         const feeMultiplier = this.resolveFeeMultipler(transaction);
         if (!feeMultiplier) {
             return transaction;
@@ -222,5 +225,10 @@ export class TransactionCommand {
             return fees || this.networkConfiguration.defaultDynamicFeeMultiplier;
         }
         return undefined;
+    }
+    private createDeadline(deadlineInHours = 2): Deadline {
+        AppStore.dispatch('network/SET_TRANSACTION_DEADLINE', deadlineInHours);
+        const deadline: Deadline = AppStore.getters['network/transactionDeadline'];
+        return deadline;
     }
 }

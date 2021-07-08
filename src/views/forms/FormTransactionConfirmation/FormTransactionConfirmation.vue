@@ -3,7 +3,7 @@
         <FormWrapper :whitelisted="true">
             <form onsubmit="event.preventDefault()">
                 <div class="transactionConfirmationBody">
-                    <div v-if="!!stagedTransactions" class="stepItem1">
+                    <div v-if="stagedTransactions && !!stagedTransactions.length" class="stepItem1">
                         <div v-for="(transaction, index) in stagedTransactions" :key="index" class="info_container">
                             <TransactionDetails :transaction="transaction" />
                         </div>

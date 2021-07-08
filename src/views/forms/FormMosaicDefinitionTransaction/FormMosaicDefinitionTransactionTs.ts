@@ -145,8 +145,10 @@ export class FormMosaicDefinitionTransactionTs extends FormTransactionBase {
         if (this.formItems.permanent) {
             this.formItems.duration = 0;
         }
+        this.createDeadline();
+        const deadline = this.simpleTransactionDeadline;
         const mosaicDefinitionTransaction = MosaicDefinitionTransaction.create(
-            this.createDeadline(),
+            deadline,
             randomNonce,
             mosaicId,
             MosaicFlags.create(this.formItems.supplyMutable, this.formItems.transferable, this.formItems.restrictable),
@@ -156,7 +158,7 @@ export class FormMosaicDefinitionTransactionTs extends FormTransactionBase {
             maxFee,
         );
         const mosaicSupplyChangeTransaction = MosaicSupplyChangeTransaction.create(
-            this.createDeadline(),
+            deadline,
             mosaicId,
             MosaicSupplyChangeAction.Increase,
             UInt64.fromUint(this.formItems.supply),

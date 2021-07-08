@@ -47,6 +47,7 @@ import {
     AccountRestrictionTransaction,
     Address,
     AddressRestrictionFlag,
+    Deadline,
     MosaicId,
     MosaicRestrictionFlag,
     NamespaceId,
@@ -180,9 +181,10 @@ export class FormAccountRestrictionTransactionTs extends FormTransactionBase {
             case AccountRestrictionTxType.ADDRESS: {
                 const toBeAdded = this.isDeleteMode ? [] : [this.instantiatedRecipient];
                 const toBeDeleted = this.isDeleteMode ? [this.instantiatedRecipient] : [];
-
+                this.createDeadline();
+                const deadline = this.simpleTransactionDeadline as Deadline;
                 return AccountRestrictionTransaction.createAddressRestrictionModificationTransaction(
-                    this.createDeadline(),
+                    deadline,
                     RestrictionFlagMapping.toRestrictionFlag(
                         restrictionTxType,
                         this.formItems.direction,
@@ -197,9 +199,10 @@ export class FormAccountRestrictionTransactionTs extends FormTransactionBase {
             case AccountRestrictionTxType.MOSAIC: {
                 const toBeAdded = this.isDeleteMode ? [] : [new MosaicId(this.formItems.mosaicIdRaw)];
                 const toBeDeleted = this.isDeleteMode ? [new MosaicId(this.formItems.mosaicIdRaw)] : [];
-
+                this.createDeadline();
+                const deadline = this.simpleTransactionDeadline as Deadline;
                 return AccountRestrictionTransaction.createMosaicRestrictionModificationTransaction(
-                    this.createDeadline(),
+                    deadline,
                     RestrictionFlagMapping.toRestrictionFlag(
                         restrictionTxType,
                         this.formItems.direction,
@@ -214,9 +217,10 @@ export class FormAccountRestrictionTransactionTs extends FormTransactionBase {
             case AccountRestrictionTxType.TRANSACTION_TYPE: {
                 const toBeAdded = this.isDeleteMode ? [] : [this.formItems.transactionType];
                 const toBeDeleted = this.isDeleteMode ? [this.formItems.transactionType] : [];
-
+                this.createDeadline();
+                const deadline = this.simpleTransactionDeadline as Deadline;
                 return AccountRestrictionTransaction.createOperationRestrictionModificationTransaction(
-                    this.createDeadline(),
+                    deadline,
                     RestrictionFlagMapping.toRestrictionFlag(
                         restrictionTxType,
                         this.formItems.direction,

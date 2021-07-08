@@ -44,6 +44,9 @@ import { NetworkConfigurationModel } from '@/core/database/entities/NetworkConfi
             networkConfiguration: 'network/networkConfiguration',
             transactionFees: 'network/transactionFees',
             isOfflineMode: 'network/isOfflineMode',
+            simpleTransactionDeadline: 'network/simpleTransactionDeadline',
+            aggregateTransactionDeadline: 'network/aggregateTransactionDeadline',
+            hashLockTransactionDeadline: 'network/hashLockTransactionDeadline',
         }),
     },
 })
@@ -69,7 +72,9 @@ export class FormTransactionBase extends Vue {
      * Default fee setting
      */
     public defaultFee: number;
-
+    public simpleTransactionDeadline: Deadline;
+    public aggregateTransactionDeadline: Deadline;
+    public hashLockTransactionDeadline: Deadline;
     /**
      * Currently active account
      */
@@ -177,8 +182,13 @@ export class FormTransactionBase extends Vue {
     /**
      * it creates the deadlines for the transactions.
      */
-    protected createDeadline(): Deadline {
-        return Deadline.create(this.epochAdjustment);
+    protected createDeadline(deadlineInHours = 2): Deadline {
+        this.$store.dispatch('network/SET_TRANSACTION_DEADLINE', deadlineInHours);
+        return deadlineInHours === 2
+            ? this.simpleTransactionDeadline || undefined
+            : deadlineInHours === 6
+            ? this.hashLockTransactionDeadline || undefined
+            : this.aggregateTransactionDeadline || undefined;
     }
 
     /**
