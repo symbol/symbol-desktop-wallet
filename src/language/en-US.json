@@ -638,6 +638,7 @@
     "mnemonic_backup_options_copy_desc": "Copy the mnemonic words and keep them in a safe place.",
     "mnemonic_backup_options_download_desc": "Download QR Code encrypted with your password. This QR Code can be used to import your accounts in different wallets (e.g. Mobile Wallet)",
     "mnemonic_copy": "Copy",
+    "mnemonic_paste": "Paste",
     "mnemonic_generation_error": "Something went wrong when generating your profile seed.",
     "mnemonic_inconsistency": "Mnemonic is not correct",
     "mnemonic_correct": "Mnemonic is correct",

@@ -638,6 +638,7 @@
     "mnemonic_backup_options_copy_desc": "ニーモニック語群をコピーして、安全な場所に保管してください。",
     "mnemonic_backup_options_download_desc": "パスワードで暗号化されたQRコードをダウンロードします。このQRコードを使用して、アカウントをさまざまなウォレット (モバイルウォレットなど) にインポートできます。",
     "mnemonic_copy": "コピー",
+    "mnemonic_paste": "ペースト",
     "mnemonic_generation_error": "プロファイルシードの生成に問題が発生しました。",
     "mnemonic_inconsistency": "ニーモニックが正しくありません",
     "mnemonic_correct": "正しいニーモニックです",

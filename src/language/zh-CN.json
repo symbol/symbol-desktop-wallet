@@ -620,6 +620,7 @@
     "mnemonic_backup_options_copy_desc": "複製助記詞並將其保存在安全的地方。",
     "mnemonic_backup_options_download_desc": "下載使用密碼加密的QR碼。 此QR碼可用於將您的帳戶導入不同的錢包（例如，移動錢包）",
     "mnemonic_copy": "复制",
+    "mnemonic_paste": "粘贴",
     "mnemonic_generation_error": "生成钱包种子失败",
     "mnemonic_inconsistency": "助记词不一致",
     "mnemonic_correct": "助记词正确",
