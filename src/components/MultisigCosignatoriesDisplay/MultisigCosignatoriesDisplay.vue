@@ -126,7 +126,6 @@ export default class MultisigCosignatoriesDisplay extends MultisigCosignatoriesD
 }
 
 /deep/ .inputs-container {
-    overflow: auto !important;
     height: auto;
 }
 </style>
