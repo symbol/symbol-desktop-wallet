@@ -56,6 +56,7 @@ const defaultAppConfig: AppConfig = {
         { value: 'en-US', label: 'English' },
         { value: 'zh-CN', label: '中文' },
         { value: 'ja-JP', label: '日本語' },
+        { value: 'ru-RU', label: 'Русский' },
     ],
     marketServerUrl: 'http://app.nemcn.io',
     articlesFeedUrl: 'https://nemgrouplimited.github.io/symbol-news/',
